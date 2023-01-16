@@ -4,6 +4,8 @@
 
 #define WARNING
 
+#define MULTITHREAD
+
 #include <list>
 #include "Node.h"
 #include <utility>

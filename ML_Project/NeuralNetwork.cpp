@@ -448,7 +448,47 @@ void NeuralNetwork::concurrentComputing(int workload, int startIndex, std::deque
 
 bool NeuralNetwork::backprop(const std::vector<float>& inputs, const std::vector<float>& outputs, const float& learnRate)
 {
-	if (inputs.size() < inputNodes.size() || outputs.size() < outputNodes.size())
+    if (inputs.size() < inputNodes.size() || outputs.size() < outputNodes.size())
+    {
+        std::cerr << "Inputs or outputs given smaller than expected\n";
+        return false;
+    }
+
+    std::vector<float> tmp;
+
+    if (compute(inputs, tmp) == true)
+    {
+        //Compute error and update weight
+        int i = 0;
+        for (std::deque<Node>::iterator it = outputNodes.begin(); it != outputNodes.end(); ++it, ++i)
+        {
+            it->delta = (it->value - outputs[i]) * it->activation->derivate(it->value);
+
+            for (int cpt = 0; cpt < it->previousNodes.size(); cpt++)
+            {
+                it->previousNodes[cpt].first->delta += it->previousNodes[cpt].second * it->delta;
+                it->previousNodes[cpt].second -= learnRate * it->delta * it->previousNodes[cpt].first->value;//Update weights
+            }
+        }
+
+        for (std::deque<std::deque<Node>>::reverse_iterator itLayer = hiddenNodes.rbegin(); itLayer != hiddenNodes.rend(); ++itLayer)
+        {
+            for (std::deque<Node>::iterator itNode = itLayer->begin(); itNode != itLayer->end(); ++itNode)
+            {
+                itNode->delta *= itNode->activation->derivate(itNode->value);
+
+                for (int cpt = 0; cpt < itNode->previousNodes.size(); cpt++)
+                {
+                    itNode->previousNodes[cpt].first->delta += itNode->previousNodes[cpt].second * itNode->delta;
+                    itNode->previousNodes[cpt].second -= learnRate * itNode->delta * itNode->previousNodes[cpt].first->value;//Update weights
+                }
+            }
+        }
+    }
+
+    return true;
+
+    /*if (inputs.size() < inputNodes.size() || outputs.size() < outputNodes.size())
 	{
 		std::cerr << "Inputs or outputs given smaller than expected\n";
 		return false;
@@ -468,7 +508,7 @@ bool NeuralNetwork::backprop(const std::vector<float>& inputs, const std::vector
 		return true;
 	}
 
-	return false;
+    return false;*/
 }
 
 void NeuralNetwork::splitBackpropThread(std::deque<Node>::iterator it, int size, const float& learnRate, const std::vector<float>* outputs)
