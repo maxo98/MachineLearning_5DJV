@@ -26,9 +26,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     for(int i = 0; i < 10; i++)
     {
-        blueX.push_back(randInt(5, 250));
+        blueX.push_back(randInt(5, 500-200));
         blueY.push_back(randInt(5, 250));
-        redX.push_back(randInt(250, 500-5));
+        redX.push_back(randInt(200, 500-5));
         redY.push_back(randInt(250, 500-5));
     }
 
@@ -48,8 +48,8 @@ MainWindow::MainWindow(QWidget *parent)
     gen.addConnection(0, 3, allConn);
     gen.addConnection(1, 3, allConn);
     gen.addConnection(2, 3, allConn);
-    gen.addConnection(3, 4, allConn);
-    gen.addConnection(2, 4, allConn);
+    //gen.addConnection(4, 3, allConn);
+    //gen.addConnection(2, 3, allConn);
 
     Neat::genomeToNetwork(gen, network);
 
