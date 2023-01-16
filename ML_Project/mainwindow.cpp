@@ -62,16 +62,16 @@ MainWindow::MainWindow(QWidget *parent)
 
     for (int i = 0; i < 10000; i++)
     {
-        for(int i = 0; i < 10; i++)
+        for(int j = 0; j < 10; j++)
         {
             output[0] = -1;
-            input[0] = blueX[i];
-            input[1] = blueY[i];
+            input[0] = blueX[j];
+            input[1] = blueY[j];
             network.backprop(input, output, 0.2);
 
             output[0] = 1;
-            input[0] = redX[i];
-            input[1] = redY[i];
+            input[0] = redX[j];
+            input[1] = redY[j];
             network.backprop(input, output, 0.2);
         }
     }
