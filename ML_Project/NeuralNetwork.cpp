@@ -4,6 +4,7 @@
 #include "NeuralNetwork.h"
 #include <limits>
 #include "ThreadPool.h"
+#include <QDebug>
 
 NeuralNetwork::NeuralNetwork()
 {
@@ -446,29 +447,73 @@ void NeuralNetwork::concurrentComputing(int workload, int startIndex, std::deque
 	}
 }
 
-bool NeuralNetwork::backprop(const std::vector<float>& inputs, const std::vector<float>& outputs, const float& learnRate)
+bool NeuralNetwork::backprop(const std::vector<float>& inputs, const std::vector<float>& outputs, const float& learnRate, bool multitrhead)
 {
-	if (inputs.size() < inputNodes.size() || outputs.size() < outputNodes.size())
-	{
-		std::cerr << "Inputs or outputs given smaller than expected\n";
-		return false;
-	}
+    if (inputs.size() < inputNodes.size() || outputs.size() < outputNodes.size())
+    {
+        std::cerr << "Inputs or outputs given smaller than expected\n";
+        return false;
+    }
 
-	std::vector<float> tmp;
+    if (multitrhead == false)
+    {
+        std::vector<float> tmp;
 
-	if (compute(inputs, tmp) == true)
-	{
-		splitBackpropThread(outputNodes.begin(), outputNodes.size(), learnRate, &outputs);
+        if (compute(inputs, tmp) == true)
+        {
+            //Compute error and update weight
+            int i = 0;
+            for (std::deque<Node>::iterator it = outputNodes.begin(); it != outputNodes.end(); ++it, ++i)
+            {
+                it->delta = (it->value - outputs[i]) * it->activation->derivate(it->value);
 
-		for (std::deque<std::deque<Node>>::reverse_iterator itLayer = hiddenNodes.rbegin(); itLayer != hiddenNodes.rend(); ++itLayer)
-		{
-			splitBackpropThread(itLayer->begin(), itLayer->size(), learnRate);
-		}
+                if (it->delta == 0) continue;
 
-		return true;
-	}
+                for (int cpt = 0; cpt < it->previousNodes.size(); cpt++)
+                {
+                    it->previousNodes[cpt].first->delta += it->previousNodes[cpt].second * it->delta;
+                    it->previousNodes[cpt].second -= learnRate * it->delta * it->previousNodes[cpt].first->value;//Update weights
+                    //qDebug() << it->previousNodes[cpt].second;
+                }
+            }
 
-	return false;
+            for (std::deque<std::deque<Node>>::reverse_iterator itLayer = hiddenNodes.rbegin(); itLayer != hiddenNodes.rend(); ++itLayer)
+            {
+                for (std::deque<Node>::iterator itNode = itLayer->begin(); itNode != itLayer->end(); ++itNode)
+                {
+                    itNode->delta *= itNode->activation->derivate(itNode->value);
+
+                    if (itNode->delta == 0) continue;
+
+                    for (int cpt = 0; cpt < itNode->previousNodes.size(); cpt++)
+                    {
+                        itNode->previousNodes[cpt].first->delta += itNode->previousNodes[cpt].second * itNode->delta;
+                        itNode->previousNodes[cpt].second -= learnRate * itNode->delta * itNode->previousNodes[cpt].first->value;//Update weights
+                        //qDebug() << itNode->previousNodes[cpt].second;
+                    }
+                }
+            }
+
+            return true;
+        }
+    }
+    else {
+        std::vector<float> tmp;
+
+        if (compute(inputs, tmp) == true)
+        {
+            splitBackpropThread(outputNodes.begin(), outputNodes.size(), learnRate, &outputs);
+
+            for (std::deque<std::deque<Node>>::reverse_iterator itLayer = hiddenNodes.rbegin(); itLayer != hiddenNodes.rend(); ++itLayer)
+            {
+                splitBackpropThread(itLayer->begin(), itLayer->size(), learnRate);
+            }
+
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void NeuralNetwork::splitBackpropThread(std::deque<Node>::iterator it, int size, const float& learnRate, const std::vector<float>* outputs)
@@ -538,7 +583,7 @@ void NeuralNetwork::splitBackpropThread(std::deque<Node>::iterator it, int size,
 
 	for (std::deque<std::atomic<bool>>::iterator itTicket = tickets.begin(); itTicket != tickets.end(); ++itTicket)
 	{
-		itTicket->wait(false);
+        itTicket->wait(false);
 	}
 }
 
@@ -558,7 +603,10 @@ void NeuralNetwork::backpropThread(int workload, int startIndex, std::deque<Node
 
 		for (int cpt = 0; cpt < it->previousNodes.size(); cpt++)
 		{
+            it->previousNodes[cpt].first->deltaMtx.lock();
 			it->previousNodes[cpt].first->delta += it->previousNodes[cpt].second * it->delta;
+            it->previousNodes[cpt].first->deltaMtx.unlock();
+
 			it->previousNodes[cpt].second -= learnRate * it->delta * it->previousNodes[cpt].first->value;//Update weights
 		}
 	}

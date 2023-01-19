@@ -18,7 +18,24 @@ public:
 
     void drawCube(int x, int y, QPainter& paint);
 
+private slots:
+    void on_pushButton_PMC_clicked();
+
+    void on_pushButton_linear_clicked();
+
+    void on_pushButton_RBF_clicked();
+
+    void on_pushButton_test1_clicked();
+
+    void on_pushButton_test2_clicked();
+
+    void on_pushButton_test3_clicked();
+
+    void on_pushButton_test4_clicked();
+
 private:
     Ui::MainWindow *ui;
+
+    QString model = "linear";
 };
 #endif // MAINWINDOW_H
