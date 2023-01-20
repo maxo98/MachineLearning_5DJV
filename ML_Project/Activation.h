@@ -91,7 +91,7 @@ class TanhActivation : public Activation {
 public:
 	virtual float activate(float x) const { return tanh(x); };
 
-    virtual float derivate(float x) const { return 1 - pow(x, 2); };
+	virtual float derivate(float x) const { return 1 - pow(tanh(x), 2); };
 
 	inline virtual std::string getId() const { return "tanh"; };
 };
