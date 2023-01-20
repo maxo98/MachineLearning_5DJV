@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QPainter>
+#include <random>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -37,5 +38,6 @@ private:
     Ui::MainWindow *ui;
 
     QString model = "linear";
+    long long seed;
 };
 #endif // MAINWINDOW_H

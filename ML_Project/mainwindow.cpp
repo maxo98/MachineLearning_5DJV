@@ -4,12 +4,14 @@
 #include <vector>
 #include "NeuralNetwork.h"
 #include "Neat.h"
+#include <algorithm>
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
-    auto seed = time(NULL);
+    seed = time(NULL);
 
     std::cout << "seed " << seed << std::endl;
 
@@ -371,14 +373,14 @@ void MainWindow::on_pushButton_test3_clicked()
     std::vector<int> blueX, blueY, redX, redY;
 
 
-    blueX.push_back(0);
-    blueY.push_back(0);
-    blueX.push_back(w);
-    blueY.push_back(h);
-    redX.push_back(w);
-    redY.push_back(0);
-    redX.push_back(0);
-    redY.push_back(h);
+    blueX.push_back(1);
+    blueY.push_back(1);
+    blueX.push_back(w-1);
+    blueY.push_back(h-1);
+    redX.push_back(w-1);
+    redY.push_back(1);
+    redX.push_back(1);
+    redY.push_back(h-1);
 
     NeuralNetwork network;
 
@@ -387,27 +389,27 @@ void MainWindow::on_pushButton_test3_clicked()
     Activation* sig = new SigmoidActivation();
 
     std::vector<Activation*> arrActiv;
-    arrActiv.push_back(sig);
+    arrActiv.push_back(tanh);
 
     std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> allConn;
 
-    Genome gen(3, 1, arrActiv);
+    Genome gen(2, 1, arrActiv);
 
     if(model == "linear")
     {
         gen.addConnection(0, 3, allConn);
         gen.addConnection(1, 3, allConn);
-        gen.addConnection(2, 3, allConn);
+        //gen.addConnection(2, 3, allConn);
 
         Neat::genomeToNetwork(gen, network);
     }else if(model == "PMC")
     {
         qDebug() << "PMC";
 
-        gen.addHiddenNode(sig, 1);
-        gen.addHiddenNode(sig, 1);
+        gen.addHiddenNode(tanh, 1);
+        gen.addHiddenNode(tanh, 1);
 
-        gen.addConnection(0, 4, allConn);
+        /*gen.addConnection(0, 4, allConn);
         gen.addConnection(1, 4, allConn);
         gen.addConnection(0, 5, allConn);
         gen.addConnection(1, 5, allConn);
@@ -415,43 +417,60 @@ void MainWindow::on_pushButton_test3_clicked()
         gen.addConnection(2, 4, allConn);
         gen.addConnection(5, 3, allConn);
         gen.addConnection(2, 5, allConn);
-        gen.addConnection(2, 3, allConn);
+        gen.addConnection(2, 3, allConn);*/
+
+        gen.addConnection(0, 3, allConn);
+        gen.addConnection(1, 3, allConn);
+        gen.addConnection(0, 4, allConn);
+        gen.addConnection(1, 4, allConn);
+        gen.addConnection(3, 2, allConn);
+        gen.addConnection(4, 2, allConn);
+
 
         Neat::genomeToNetwork(gen, network);
     }
 
-    std::vector<float> input, output;
+    std::vector<std::vector<float>> input, output;
 
-    input.push_back(-1);
-    input.push_back(-1);
-    input.push_back(1);
-    output.push_back(1);
+    input.resize(4);
+    output.resize(4);
 
-    for (int i = 0; i < 100000; i++)
+    input[0].push_back(redX[0]/float(w));
+    input[0].push_back(redX[0]/float(w));
+    //input[0].push_back(0.5);
+    output[0].push_back(1);
+
+    input[1].push_back(redX[1]/float(w));
+    input[1].push_back(redY[1]/float(h));
+    //input[1].push_back(0.5);
+    output[1].push_back(1);
+
+    input[2].push_back(blueX[1]/float(w));
+    input[2].push_back(blueY[1]/float(h));
+    //input[2].push_back(0.5);
+    output[2].push_back(-1);
+
+    input[3].push_back(blueX[0]/float(w));
+    input[3].push_back(blueY[0]/float(h));
+    //input[3].push_back(0.5);
+    output[3].push_back(-1);
+
+    for (int i = 0; i < 100000000; i++)
     {
-        output[0] = 0;
-        input[0] = blueX[0]/float(w);
-        input[1] = blueY[0]/float(h);
-        network.backprop(input, output, 0.1, false);
 
-        output[0] = 1;
-        input[0] = redX[0]/float(w);
-        input[1] = redY[0]/float(h);
-        network.backprop(input, output, 0.1, false);
+        int index = randInt(0, 3);
 
-        output[0] = 0;
-        input[0] = blueX[1]/float(w);
-        input[1] = blueY[1]/float(h);
-        network.backprop(input, output, 0.1, false);
+        network.backprop(input[index], output[index], 0.01, false);
 
-        output[0] = 1;
-        input[0] = redX[1]/float(w);
-        input[1] = redY[1]/float(h);
-        network.backprop(input, output, 0.1, false);
     }
-    //network.applyBackprop(gen);
+    network.applyBackprop(gen);
 
-    //Neat::genomeToNetwork(gen, network);
+    for(std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int>::iterator itNodes = gen.getNodesToConn()->begin(); itNodes != gen.getNodesToConn()->end(); ++itNodes)
+    {
+        qDebug() << itNodes->first << " " << (*gen.getConnections())[itNodes->second].getWeight();
+    }
+
+    Neat::genomeToNetwork(gen, network);
 
 
 
@@ -460,14 +479,14 @@ void MainWindow::on_pushButton_test3_clicked()
     {
         for(int j = 0; j < h; j++)
         {
-            input[0] = i/float(w);
-            input[1] = j/float(h);
-            network.compute(input, output);
+            input[0][0] = i/float(w);
+            input[0][1] = j/float(h);
+            network.compute(input[0], output[0]);
 
-            if(output[0] > 0.5)
+            if(output[0][0] > 0)
             {
                 paint.setPen(QColor(128, 0, 0, 255));
-            }else{
+            }else if(output[0][0] < 0.5){
                 paint.setPen(QColor(0, 0, 128, 255));
             }
 
@@ -482,8 +501,11 @@ void MainWindow::on_pushButton_test3_clicked()
     {
         if(imgTest.pixel(blueX[i], blueY[i]) != QColor(0, 0, 128).rgb())
         {
+            input[0][0] = blueX[i]/float(w);
+            input[0][1] = blueY[i]/float(h);
+            network.compute(input[0], output[0]);
             validated = false;
-            qDebug() << "blue " << imgTest.pixelColor(blueX[i], blueY[i]).red() << " " << imgTest.pixelColor(blueX[i], blueY[i]).green() << " " << imgTest.pixelColor(blueX[i], blueY[i]).blue();
+            qDebug() << "blue " << output[0];
         }
     }
 
@@ -491,8 +513,11 @@ void MainWindow::on_pushButton_test3_clicked()
     {
         if(imgTest.pixel(redX[i], redY[i]) != QColor(128, 0, 0).rgb())
         {
+            input[0][0] = redX[i]/float(w);
+            input[0][1] = redY[i]/float(h);
+            network.compute(input[0], output[0]);
             validated = false;
-            qDebug() << "red " << imgTest.pixelColor(redX[i], redY[i]).red() << " " << imgTest.pixelColor(redX[i], redY[i]).green() << " " << imgTest.pixelColor(redX[i], redY[i]).blue();
+            qDebug() << "red " << output[0];
         }
     }
 

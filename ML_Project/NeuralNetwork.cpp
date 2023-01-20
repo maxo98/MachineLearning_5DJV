@@ -461,11 +461,13 @@ bool NeuralNetwork::backprop(const std::vector<float>& inputs, const std::vector
 
         if (compute(inputs, tmp) == true)
         {
+            //qDebug() << tmp << " " << outputs;
+
             //Compute error and update weight
             int i = 0;
             for (std::deque<Node>::iterator it = outputNodes.begin(); it != outputNodes.end(); ++it, ++i)
             {
-                it->delta = (it->value - outputs[i]) * it->activation->derivate(it->value);
+                it->delta = (it->value - outputs[i]) * it->activation->derivate(it->value);//Potential mistake here, if we use something else than sig or tanh
 
                 if (it->delta == 0) continue;
 
@@ -473,7 +475,7 @@ bool NeuralNetwork::backprop(const std::vector<float>& inputs, const std::vector
                 {
                     it->previousNodes[cpt].first->delta += it->previousNodes[cpt].second * it->delta;
                     it->previousNodes[cpt].second -= learnRate * it->delta * it->previousNodes[cpt].first->value;//Update weights
-                    //qDebug() << it->previousNodes[cpt].second;
+                    //
                 }
             }
 
@@ -493,6 +495,39 @@ bool NeuralNetwork::backprop(const std::vector<float>& inputs, const std::vector
                     }
                 }
             }
+
+            i = 0;
+            for (std::deque<Node>::iterator it = outputNodes.begin(); it != outputNodes.end(); ++it, ++i)
+            {
+                it->delta = (it->value - outputs[i]) * it->activation->derivate(it->value);//Potential mistake here, if we use something else than sig or tanh
+
+                if (it->delta == 0) continue;
+
+                for (int cpt = 0; cpt < it->previousNodes.size(); cpt++)
+                {
+                    it->previousNodes[cpt].second -= learnRate * it->delta * it->previousNodes[cpt].first->value;//Update weights
+                    //
+                }
+            }
+
+            for (std::deque<std::deque<Node>>::reverse_iterator itLayer = hiddenNodes.rbegin(); itLayer != hiddenNodes.rend(); ++itLayer)
+            {
+                for (std::deque<Node>::iterator itNode = itLayer->begin(); itNode != itLayer->end(); ++itNode)
+                {
+                    itNode->delta *= itNode->activation->derivate(itNode->value);
+
+                    if (itNode->delta == 0) continue;
+
+                    for (int cpt = 0; cpt < itNode->previousNodes.size(); cpt++)
+                    {
+                        itNode->previousNodes[cpt].second -= learnRate * itNode->delta * itNode->previousNodes[cpt].first->value;//Update weights
+                        //qDebug() << itNode->previousNodes[cpt].second;
+                    }
+                }
+            }
+
+            //compute(inputs, tmp);
+            //qDebug() << inputs << " " << tmp << " " << outputs << "\n";
 
             return true;
         }
