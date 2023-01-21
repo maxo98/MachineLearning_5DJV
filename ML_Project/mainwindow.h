@@ -37,5 +37,6 @@ private:
     Ui::MainWindow *ui;
 
     QString model = "linear";
+    long long seed;
 };
 #endif // MAINWINDOW_H

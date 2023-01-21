@@ -4,12 +4,13 @@
 #include <vector>
 #include "NeuralNetwork.h"
 #include "Neat.h"
+#include <random>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
-    auto seed = time(NULL);
+    seed = time(NULL);
 
     std::cout << "seed " << seed << std::endl;
 
@@ -570,6 +571,7 @@ void MainWindow::on_pushButton_test3_clicked()
 
 void MainWindow::on_pushButton_test4_clicked()
 {
+    std::default_random_engine generator (seed);
     ui->label_result->setText("Result: pending");
 
     int h = ui->label->height();
@@ -591,6 +593,7 @@ void MainWindow::on_pushButton_test4_clicked()
     NeuralNetwork network;
 
     Activation* tanh = new TanhActivation();
+    Activation* sig = new SigmoidActivation();
     Activation* lin = new LinearActivation();
     Activation* gauss = new GaussianActivation();
 
@@ -601,6 +604,7 @@ void MainWindow::on_pushButton_test4_clicked()
 
     Genome gen(3, 1, arrActiv);
     float normalizedXavier = 1/sqrt(3.f);
+    std::normal_distribution<double> normalDist (0.0, sqrt(2.f/2.f));//He init, mean 0, variance sqrt(2/nInput)
 
     if(model == "linear")
     {
@@ -616,19 +620,19 @@ void MainWindow::on_pushButton_test4_clicked()
         gen.addHiddenNode(tanh, 1);
         gen.addHiddenNode(tanh, 1);
 
-        gen.addConnection(0, 4, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(1, 4, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(0, 5, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(1, 5, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(1, 6, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(0, 6, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(1, 7, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(0, 7, allConn, randPosNeg() * randFloat() * normalizedXavier);
+        gen.addConnection(0, 4, allConn, randPosNeg() * randFloat() * 1/4.f);
+        gen.addConnection(1, 4, allConn, randPosNeg() * randFloat() * 1/4.f);
+        gen.addConnection(0, 5, allConn, randPosNeg() * randFloat() * 1/4.f);
+        gen.addConnection(1, 5, allConn, randPosNeg() * randFloat() * 1/4.f);
+        gen.addConnection(1, 6, allConn, randPosNeg() * randFloat() * 1/4.f);
+        gen.addConnection(0, 6, allConn, randPosNeg() * randFloat() * 1/4.f);
+        gen.addConnection(1, 7, allConn, randPosNeg() * randFloat() * 1/4.f);
+        gen.addConnection(0, 7, allConn, randPosNeg() * randFloat() * 1/4.f);
 
-        gen.addConnection(4, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(5, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(6, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(7, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
+        gen.addConnection(4, 3, allConn, normalDist(generator));
+        gen.addConnection(5, 3, allConn, normalDist(generator));
+        gen.addConnection(6, 3, allConn, normalDist(generator));
+        gen.addConnection(7, 3, allConn, normalDist(generator));
 
         gen.addConnection(2, 4, allConn, 0);
         gen.addConnection(2, 5, allConn, 0);
@@ -646,19 +650,24 @@ void MainWindow::on_pushButton_test4_clicked()
         gen.addHiddenNode(gauss, 1);
         gen.addHiddenNode(gauss, 1);
 
-        gen.addConnection(0, 4, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(1, 4, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(0, 5, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(1, 5, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(1, 6, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(0, 6, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(1, 7, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(0, 7, allConn, randPosNeg() * randFloat() * normalizedXavier);
+        gen.addConnection(0, 4, allConn, randPosNeg() * randFloat() * 1/4.f);//Lecun init : mean 0, Standard deviation 1/n^(l - 1) where n number of neurons in layer l
+        gen.addConnection(1, 4, allConn, randPosNeg() * randFloat() * 1/4.f);
+        gen.addConnection(0, 5, allConn, randPosNeg() * randFloat() * 1/4.f);
+        gen.addConnection(1, 5, allConn, randPosNeg() * randFloat() * 1/4.f);
+        gen.addConnection(1, 6, allConn, randPosNeg() * randFloat() * 1/4.f);
+        gen.addConnection(0, 6, allConn, randPosNeg() * randFloat() * 1/4.f);
+        gen.addConnection(1, 7, allConn, randPosNeg() * randFloat() * 1/4.f);
+        gen.addConnection(0, 7, allConn, randPosNeg() * randFloat() * 1/4.f);
 
-        gen.addConnection(4, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(5, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(6, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(7, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
+        gen.addConnection(4, 3, allConn, randPosNeg() * randFloat() * 1/4.f);
+        gen.addConnection(5, 3, allConn, randPosNeg() * randFloat() * 1/4.f);
+        gen.addConnection(6, 3, allConn, randPosNeg() * randFloat() * 1/4.f);
+        gen.addConnection(7, 3, allConn, randPosNeg() * randFloat() * 1/4.f);
+
+        /*gen.addConnection(4, 3, allConn, normalDist(generator));
+        gen.addConnection(5, 3, allConn, normalDist(generator));//He init
+        gen.addConnection(6, 3, allConn, normalDist(generator));
+        gen.addConnection(7, 3, allConn, normalDist(generator));*/
 
         gen.addConnection(2, 4, allConn, 0);
         gen.addConnection(2, 5, allConn, 0);
@@ -691,12 +700,15 @@ void MainWindow::on_pushButton_test4_clicked()
         }
     }
 
-    for (int i = 0; i < 10000000; i++)
+    for (int i = 0; i < 50000000; i++)
     {
         int index = randInt(0, 499);
 
-        network.backprop(input[index], output[index], 0.1, false);
+        network.backprop(input[index], output[index], 0.05 * sig->activate(0.5f - (i/10000000.f)*4), false);
     }
+
+
+
     //network.applyBackprop(gen);
 
     //Neat::genomeToNetwork(gen, network);
