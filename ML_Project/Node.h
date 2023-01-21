@@ -17,13 +17,14 @@ public:
 	Node(Activation* activation, int _id = -1);
 	~Node();
 
-    Node(const Node& other);
-    Node(Node&& other) noexcept;
+	Node(const Node& other);
+	Node(Node&& other) noexcept;
 
 	void wipeConnections();
 	void addConnection(Node*, float, bool);
 
 	inline float getValue() { return value; }
+	inline float getBackpropValue() { return backpropValue; }
 	inline float getOldValue() { return oldValue; }
 	inline Activation* getActivation() { return activation; }
 	inline std::vector<std::pair<Node*, float>>* getPreviousNodes() { return &previousNodes; }
@@ -47,5 +48,6 @@ private:
 	float oldValue;
 	int id;
 	float delta = 0;//Error bakcprop
-    std::mutex deltaMtx;
+	std::mutex deltaMtx;
+	float backpropValue;
 };

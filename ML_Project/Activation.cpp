@@ -2,7 +2,6 @@
 
 
 #include "Activation.h"
-#include <cstring>
 
 std::vector<Activation> Activation::activationRegister = std::vector<Activation>();
 bool Activation::init = false;
