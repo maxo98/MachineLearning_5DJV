@@ -20,8 +20,6 @@ public:
 	NeuralNetwork();
 	~NeuralNetwork();
 
-	void fullyConnect();//Might be deprecated
-
 	inline unsigned int getLayerSize() { return hiddenNodes.size() + 2; };
 	unsigned int getNHiddenNode(unsigned int layer);
 	inline unsigned int getNInputNode() { return inputNodes.size(); }
@@ -42,13 +40,13 @@ public:
 	void connectNodes(unsigned int layerA, unsigned int nodeA, unsigned int layerB, unsigned int nodeB, float weight);
 	void connectNodes(std::pair<unsigned int, unsigned int> nodeA, std::pair<unsigned int, unsigned int> nodeB, float weight);
 
-	bool compute(const std::vector<float> &inputs, std::vector<float> &outputs);
+	bool compute(const std::vector<float>& inputs, std::vector<float>& outputs);
 	bool computeSpecificOuputs(const std::vector<float>& inputs, std::vector<float>& outputs, const std::vector<int>& indices);
 	bool prepareComputation(const std::vector<float>& inputs);
 	void splitLayerComputing(std::deque<Node>::iterator it, int size, bool output = false, std::vector<float>* outputs = nullptr);
 	void concurrentComputing(int workload, int startIndex, std::deque<Node>::iterator it, bool output, std::vector<float>* outputs, std::atomic<bool>* ticket = nullptr);
 
-    bool backprop(const std::vector<float>& inputs, const std::vector<float>& outputs, const float& learnRate, bool multitrhead = true);
+	bool backprop(const std::vector<float>& inputs, const std::vector<float>& outputs, const float& learnRate, bool multitrhead = true);
 	void splitBackpropThread(std::deque<Node>::iterator it, int size, const float& learnRate, const std::vector<float>* outputs = nullptr);
 	void backpropThread(int workload, int startIndex, std::deque<Node>::iterator it, const float& learnRate, const std::vector<float>* outputs = nullptr, std::atomic<bool>* ticket = nullptr);
 	void applyBackprop(Genome& gen);

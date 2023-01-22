@@ -424,37 +424,14 @@ void MainWindow::on_pushButton_test3_clicked()
     {
         qDebug() << "PMC";
 
-        gen.addHiddenNode(sig, 1);
-        gen.addHiddenNode(sig, 1);
-
-        gen.addConnection(0, 4, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(1, 4, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(0, 5, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(1, 5, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(4, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(2, 4, allConn, 0);
-        gen.addConnection(5, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(2, 5, allConn, 0);
-        gen.addConnection(2, 3, allConn, 0);
+        gen.fullyConnect(1, 2, sig, lin, allConn, xavierNormalInit, seed);
 
         Neat::genomeToNetwork(gen, network);
     }else if(model == "RBF")
     {
         qDebug() << "RBF";
 
-        gen.addHiddenNode(gauss, 1);
-        gen.addHiddenNode(gauss, 1);
-
-        gen.addConnection(0, 4, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(1, 4, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(0, 5, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(1, 5, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(4, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(2, 4, allConn, 0);
-        gen.addConnection(5, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(2, 5, allConn, 0);
-        gen.addConnection(2, 3, allConn, 0);
-
+        gen.fullyConnect(1, 2, gauss, lin, allConn, xavierNormalInit, seed);
         Neat::genomeToNetwork(gen, network);
     }
 
@@ -603,94 +580,39 @@ void MainWindow::on_pushButton_test4_clicked()
     std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> allConn;
 
     Genome gen(3, 1, arrActiv);
-    float normalizedXavier = 1/sqrt(3.f);
-    std::normal_distribution<double> normalDist (0.0, sqrt(2.f/2.f));//He init, mean 0, variance sqrt(2/nInput)
 
     if(model == "linear")
     {
-        gen.addConnection(0, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(1, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(2, 3, allConn, 0);
+        gen.fullyConnect(0, 0, gauss, lin, allConn, xavierNormalInit, seed);
 
         Neat::genomeToNetwork(gen, network);
     }else if(model == "PMC")
     {
-        gen.addHiddenNode(tanh, 1);
-        gen.addHiddenNode(tanh, 1);
-        gen.addHiddenNode(tanh, 1);
-        gen.addHiddenNode(tanh, 1);
-
-        gen.addConnection(0, 4, allConn, randPosNeg() * randFloat() * 1/4.f);
-        gen.addConnection(1, 4, allConn, randPosNeg() * randFloat() * 1/4.f);
-        gen.addConnection(0, 5, allConn, randPosNeg() * randFloat() * 1/4.f);
-        gen.addConnection(1, 5, allConn, randPosNeg() * randFloat() * 1/4.f);
-        gen.addConnection(1, 6, allConn, randPosNeg() * randFloat() * 1/4.f);
-        gen.addConnection(0, 6, allConn, randPosNeg() * randFloat() * 1/4.f);
-        gen.addConnection(1, 7, allConn, randPosNeg() * randFloat() * 1/4.f);
-        gen.addConnection(0, 7, allConn, randPosNeg() * randFloat() * 1/4.f);
-
-        gen.addConnection(4, 3, allConn, normalDist(generator));
-        gen.addConnection(5, 3, allConn, normalDist(generator));
-        gen.addConnection(6, 3, allConn, normalDist(generator));
-        gen.addConnection(7, 3, allConn, normalDist(generator));
-
-        gen.addConnection(2, 4, allConn, 0);
-        gen.addConnection(2, 5, allConn, 0);
-        gen.addConnection(2, 3, allConn, 0);
-        gen.addConnection(2, 6, allConn, 0);
-        gen.addConnection(2, 7, allConn, 0);
+        gen.fullyConnect(1, 4, tanh, lin, allConn, xavierNormalInit, seed);
 
         Neat::genomeToNetwork(gen, network);
     }else if(model == "RBF")
     {
         qDebug() << "RBF";
 
-        gen.addHiddenNode(gauss, 1);
-        gen.addHiddenNode(gauss, 1);
-        gen.addHiddenNode(gauss, 1);
-        gen.addHiddenNode(gauss, 1);
-
-        gen.addConnection(0, 4, allConn, randPosNeg() * randFloat() * 1/4.f);//Lecun init : mean 0, Standard deviation 1/n^(l - 1) where n number of neurons in layer l
-        gen.addConnection(1, 4, allConn, randPosNeg() * randFloat() * 1/4.f);
-        gen.addConnection(0, 5, allConn, randPosNeg() * randFloat() * 1/4.f);
-        gen.addConnection(1, 5, allConn, randPosNeg() * randFloat() * 1/4.f);
-        gen.addConnection(1, 6, allConn, randPosNeg() * randFloat() * 1/4.f);
-        gen.addConnection(0, 6, allConn, randPosNeg() * randFloat() * 1/4.f);
-        gen.addConnection(1, 7, allConn, randPosNeg() * randFloat() * 1/4.f);
-        gen.addConnection(0, 7, allConn, randPosNeg() * randFloat() * 1/4.f);
-
-        gen.addConnection(4, 3, allConn, randPosNeg() * randFloat() * 1/4.f);
-        gen.addConnection(5, 3, allConn, randPosNeg() * randFloat() * 1/4.f);
-        gen.addConnection(6, 3, allConn, randPosNeg() * randFloat() * 1/4.f);
-        gen.addConnection(7, 3, allConn, randPosNeg() * randFloat() * 1/4.f);
-
-        /*gen.addConnection(4, 3, allConn, normalDist(generator));
-        gen.addConnection(5, 3, allConn, normalDist(generator));//He init
-        gen.addConnection(6, 3, allConn, normalDist(generator));
-        gen.addConnection(7, 3, allConn, normalDist(generator));*/
-
-        gen.addConnection(2, 4, allConn, 0);
-        gen.addConnection(2, 5, allConn, 0);
-        gen.addConnection(2, 3, allConn, 0);
-        gen.addConnection(2, 6, allConn, 0);
-        gen.addConnection(2, 7, allConn, 0);
+        gen.fullyConnect(1, 4, gauss, lin, allConn, xavierNormalInit, seed);
 
         Neat::genomeToNetwork(gen, network);
     }
 
     std::vector<std::vector<float>> input, output;
 
-    input.resize(500);
-    output.resize(500);
+    input.resize(1000);
+    output.resize(1000);
 
-    for(int i = 0; i < 500; i++)
+    for(int i = 0; i < 1000; i++)
     {
         blueX.push_back(randInt(0, 499));
         blueY.push_back(randInt(0, 499));
 
         input[i].push_back(blueX[i]/float(w));
         input[i].push_back(blueY[i]/float(h));
-        input[i].push_back(1);
+        input[i].push_back(0.5);
 
         if((blueX[i] <= 150 || blueX[i] >= (500 - 150)) && (blueY[i] <= 150 || blueY[i] >= (500 - 150)))
         {
@@ -702,7 +624,7 @@ void MainWindow::on_pushButton_test4_clicked()
 
     for (int i = 0; i < 50000000; i++)
     {
-        int index = randInt(0, 499);
+        int index = randInt(0, 999);
 
         network.backprop(input[index], output[index], 0.05 * sig->activate(0.5f - (i/10000000.f)*4), false);
     }
@@ -736,7 +658,7 @@ void MainWindow::on_pushButton_test4_clicked()
     bool validated = true;
     QImage imgTest = pix.toImage();
 
-    for(int i = 0; i < 500; i++)
+    for(int i = 0; i < 1000; i++)
     {
         if((blueX[i] <= 150 || blueX[i] >= (500 - 150)) && (blueY[i] <= 150 || blueY[i] >= (500 - 150)))
         {
@@ -755,7 +677,7 @@ void MainWindow::on_pushButton_test4_clicked()
         }
     }
 
-    for(int i = 0; i < 500; i++)
+    for(int i = 0; i < 1000; i++)
     {
         if((blueX[i] <= 150 || blueX[i] >= (500 - 150)) && (blueY[i] <= 150 || blueY[i] >= (500 - 150)))
         {
