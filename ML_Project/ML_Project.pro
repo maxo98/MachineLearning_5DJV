@@ -10,20 +10,11 @@ CONFIG += c++20
 
 SOURCES += \
     Activation.cpp \
-    BackpropTest.cpp \
-    CPPN_Neat.cpp \
-    ES_Hyperneat.cpp \
-    ES_Snake.cpp \
     GeneConnection.cpp \
     GeneNode.cpp \
     Genome.cpp \
-    HyperBackprop.cpp \
-    Hyperneat.cpp \
-    Neat.cpp \
     NeuralNetwork.cpp \
     Node.cpp \
-    Species.cpp \
-    TestHyperneat.cpp \
     ThreadPool.cpp \
     Utils.cpp \
     main.cpp \
@@ -31,20 +22,11 @@ SOURCES += \
 
 HEADERS += \
     Activation.h \
-    BackpropTest.h \
-    CPPN_Neat.h \
-    ES_Hyperneat.h \
-    ES_Snake.h \
     GeneConnection.h \
     GeneNode.h \
     Genome.h \
-    HyperBackprop.h \
-    Hyperneat.h \
-    Neat.h \
     NeuralNetwork.h \
     Node.h \
-    Species.h \
-    TestHyperneat.h \
     ThreadPool.h \
     Utils.h \
     mainwindow.h
