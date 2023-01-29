@@ -53,6 +53,8 @@ public:
 	void backpropThread(int workload, int startIndex, std::deque<Node>::iterator it, const float& learnRate, const std::vector<float>* outputs = nullptr, std::atomic<bool>* ticket = nullptr);
 	void applyBackprop(Genome& gen);
 
+    static void genomeToNetwork(Genome& genome, NeuralNetwork& network);
+
 	void clear();
 	void clearConnections();
 	void clearHidden();

@@ -594,3 +594,56 @@ void NeuralNetwork::applyBackprop(Genome& gen)
 		}
 	}
 }
+
+void NeuralNetwork::genomeToNetwork(Genome& genome, NeuralNetwork& network)
+{
+    network.clear();
+
+    std::vector<GeneNode>* nodes = genome.getNodes();
+    std::vector<std::pair<unsigned int, unsigned int>> nodePosition;//Stores postion of the nodes in the network
+    nodePosition.reserve(nodes->size());
+
+    //Add the nodes to the layer
+    int i = 0;
+    for (std::vector<GeneNode>::iterator node = nodes->begin(); node != nodes->end(); ++node, ++i)
+    {
+        unsigned int layer = node->getLayer();
+
+        switch (node->getType())
+        {
+        case NODE_TYPE::HIDDEN:
+            nodePosition.push_back(std::pair<unsigned int, unsigned int>(layer, network.getNHiddenNode(layer)));
+            network.addHiddenNode(layer, node->getActivation(), i);
+            break;
+
+        case NODE_TYPE::INPUT:
+            nodePosition.push_back(std::pair<unsigned int, unsigned int>(0, network.getNInputNode()));
+            network.addInputNode(i);
+            break;
+
+        case NODE_TYPE::OUTPUT:
+            nodePosition.push_back(std::pair<unsigned int, unsigned int>(-1, network.getNOutputNode()));
+            network.addOutputNode(node->getActivation(), i);
+            break;
+        }
+    }
+
+    //Need to find on which layer the output nodes really are
+    for (unsigned int i = 0; i < nodePosition.size(); i++)
+    {
+        if (nodePosition[i].first == -1)
+        {
+            nodePosition[i].first = network.getLayerSize() - 1;
+        }
+    }
+
+    std::map<unsigned int, GeneConnection>* connections = genome.getConnections();
+
+    for (std::map<unsigned int, GeneConnection>::iterator connection = connections->begin(); connection != connections->end(); ++connection)
+    {
+        if (connection->second.isEnabled() == true)
+        {
+            network.connectNodes(nodePosition[connection->second.getNodeA()], nodePosition[connection->second.getNodeB()], connection->second.getWeight());
+        }
+    }
+}

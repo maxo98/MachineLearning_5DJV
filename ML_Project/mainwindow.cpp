@@ -3,7 +3,6 @@
 #include "Utils.h"
 #include <vector>
 #include "NeuralNetwork.h"
-#include "Neat.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -51,7 +50,7 @@ MainWindow::MainWindow(QWidget *parent)
     //gen.addConnection(4, 3, allConn);
     //gen.addConnection(2, 3, allConn);
 
-    Neat::genomeToNetwork(gen, network);
+    NeuralNetwork::genomeToNetwork(gen, network);
 
     std::vector<float> input, output;
 
