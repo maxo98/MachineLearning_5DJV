@@ -11,6 +11,7 @@
 #include "GeneNode.h"
 #include "GeneConnection.h"
 #include <random>
+#include <deque>
 
 class CPPN_Neat;
 
@@ -49,9 +50,9 @@ public:
 	void mutateActivation(std::vector<Activation*>& activationFunctions);
 	void mutateWeights(float power, float rate, WEIGHT_MUTATOR mutType);
 
-	inline std::map<unsigned int, GeneConnection>* const getConnections() { return &connections; };
+    inline std::map<unsigned int, GeneConnection>* const getConnections() { return &connections; };
 	inline std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int>* getNodesToConn() { return &nodesToConnection; };
-	inline std::vector<GeneNode>* const getNodes() { return &nodes; };
+    inline std::vector<GeneNode>* const getNodes() { return &nodes; };
 	inline void setScore(float _score) { score = _score; };
 	inline float getScore() { return score; };
 	inline void setSpeciesScore(float _score) { speciesScore = _score; };
@@ -126,12 +127,12 @@ private:
 
 	void shiftNodes(unsigned int node, unsigned int layerMin);
 
-	unsigned int input, output;
+    unsigned int input = 0, output = 0;
 
-	std::map<unsigned int, GeneConnection> connections;
+    std::map<unsigned int, GeneConnection> connections;
 	std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> nodesToConnection;//From a pair of nodes to innovation number of connection
-	std::vector<unsigned int> orderAddedCon;
-	std::vector<GeneNode> nodes;
+    std::vector<unsigned int> orderAddedCon;
+    std::vector<GeneNode> nodes;
 	float score = 0;
 	float speciesScore = 0;
 	int superChampOffspring = 0;

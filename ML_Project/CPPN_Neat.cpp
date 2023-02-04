@@ -76,8 +76,8 @@ void CPPN_Neat::mutate(Genome& genome, std::mutex* lock)
 
 float CPPN_Neat::distance(Genome& genomeA, Genome& genomeB)
 {
-	const std::vector<GeneNode>* nodesA = genomeA.getNodes();
-	const std::vector<GeneNode>* nodesB = genomeB.getNodes();
+    const std::vector<GeneNode>* nodesA = genomeA.getNodes();
+    const std::vector<GeneNode>* nodesB = genomeB.getNodes();
 
 	int count = 0;
 

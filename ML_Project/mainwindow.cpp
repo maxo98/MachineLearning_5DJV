@@ -2,9 +2,10 @@
 #include "ui_mainwindow.h"
 #include "Utils.h"
 #include <vector>
-#include "NeuralNetwork.h"
+
 #include "Neat.h"
 #include <random>
+#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -17,6 +18,12 @@ MainWindow::MainWindow(QWidget *parent)
     srand(seed);//Some random parts don't use this seed
 
     ui->setupUi(this);
+
+    Activation* lin = new LinearActivation();
+
+    std::vector<Activation*> arrActiv;
+    arrActiv.push_back(lin);
+    mainGen = Genome(380*380*3+1, 3, arrActiv);
 
 }
 
@@ -697,5 +704,305 @@ void MainWindow::on_pushButton_test4_clicked()
     }
 
     ui->label->setPixmap(pix);
+}
+
+
+void MainWindow::on_pushButton_train_clicked()
+{
+    if(trainingFolder == "")
+    {
+        ui->label_mainResult->setText("No training data set, please pick one");
+        return;
+    }
+
+    Activation* sig = new SigmoidActivation();
+
+    std::deque<std::vector<float>> input, output;
+
+    loadData(input, output, trainingFolder);
+
+    bool validNum;
+    double epoch = double(ui->lineEdit_epoch->text().toInt(&validNum));
+
+    if(validNum == false)
+    {
+        ui->label_mainResult->setText("Error epoch is not a number");
+        return;
+    }
+
+    float lRate = ui->lineEdit_lRate->text().toFloat(&validNum);
+
+    if(validNum == false)
+    {
+        ui->label_mainResult->setText("Error learning rate is not a number");
+        return;
+    }
+
+    qDebug() << input.size() << " " << input[0].size();
+    qDebug() << output.size() << " " << output[0].size();
+    qDebug() << epoch;
+
+    for (int i = 0; i < epoch; i++)
+    {
+        int index = randInt(0, input.size()-1);
+
+        qDebug() << i << " " << input[index].size() << " " << output[index].size();
+
+        mainNetwork.backprop(input[index], output[index], lRate, false);
+    }
+
+    test();
+}
+
+
+void MainWindow::on_pushButton_test_clicked()
+{
+    test();
+}
+
+float MainWindow::test()
+{
+    if(testFolder == "")
+    {
+        ui->label_mainResult->setText("No test data set, please pick one");
+        return 0;
+    }
+
+    qDebug() << "Start test";
+
+    std::deque<std::vector<float>> input, output;
+
+    std::vector<float> test;
+
+    loadData(input, output, testFolder);
+
+    float score = 0;
+
+    for(int i = 0; i < input.size(); i++)
+    {
+        mainNetwork.compute(input[i], test);
+
+        int maxIndex = 0;
+
+        qDebug() << test[0];
+
+        for(int cpt = 1; cpt < 3; cpt++)
+        {
+            qDebug() << test[cpt];
+
+            if(test[maxIndex] < test[cpt])
+            {
+                maxIndex = cpt;
+            }
+        }
+
+        for(int cpt = 0; cpt < 3; cpt++)
+        {
+            if(output[i][cpt] == 1)
+            {
+                if(maxIndex == cpt)
+                {
+                    score++;
+                }
+            }
+        }
+    }
+
+    score = score / output.size() * 100;
+
+    qDebug() << score;
+
+    qDebug() << QString::number(score);
+
+    ui->label_mainResult->setText("Result: " + QString::number(score));
+
+    return score;
+}
+
+void MainWindow::loadData(std::deque<std::vector<float>>& input, std::deque<std::vector<float>>& output, const QString& folder)
+{
+    QString strList[3] = {"/Homme", "/Femme", "/Autre"};
+
+    int count = 0;
+
+    for(int i2 = 0; i2 < 3; i2++)
+    {
+        QDir dir(folder + strList[i2]);
+        QStringList filter;
+
+        filter << QLatin1String("*.png");
+        filter << QLatin1String("*.jpeg");
+        filter << QLatin1String("*.jpg");
+
+        dir.setNameFilters(filter);
+
+        QFileInfoList filelistinfo = dir.entryInfoList();
+        QStringList fileList;
+
+        input.resize(filelistinfo.size() + input.size());
+        output.resize(filelistinfo.size() + output.size());
+
+        std::deque<std::vector<float>>::iterator itInput = input.begin() + count;
+        std::deque<std::vector<float>>::iterator itOutput = output.begin() + count;
+
+        foreach (const QFileInfo &fileinfo, filelistinfo)
+        {
+            QImage image(fileinfo.absoluteFilePath());
+
+            itInput->resize(380*380*3+1);
+
+            for(int x = 0; x < 308; x++)
+            {
+                for(int y = 0; y < 380; y++)
+                {
+                    QColor color = image.pixelColor(x, y);
+
+                    (*itInput)[x * 380 * 3 + y * 3] = color.redF();
+                    (*itInput)[x * 380 * 3 + y * 3] = color.greenF();
+                    (*itInput)[x * 380 * 3 + y * 3] = color.blueF();
+                }
+            }
+
+            (*itInput)[380*380*3] = 0.5f;//Bias
+
+            itOutput->resize(3);
+
+            for(int i = 0; i < 3; i++)
+            {
+                (*itOutput)[i] = (i == i2 ? 1 : -1);
+            }
+
+            ++itInput;
+            ++itOutput;
+        }
+
+        count = input.size();
+    }
+}
+
+void MainWindow::on_pushButton_pick_clicked()
+{
+    QString fileName = QFileDialog::getOpenFileName(this,
+        tr("Pick network"), "", tr("*"));
+
+    if (fileName.isEmpty())
+        return;
+
+    Activation* lin = new LinearActivation();
+    std::vector<Activation*> arrActiv;
+    arrActiv.push_back(lin);
+
+    mainGen.loadGenome(fileName.toStdString());
+
+    Neat::genomeToNetwork(mainGen, mainNetwork);
+
+    ui->label_netPath->setText(fileName);
+}
+
+
+void MainWindow::on_pushButton_newLinear_clicked()
+{
+    newNetType = NewNetwork::LINEAR;
+    ui->label_netPath->setText("New linear");
+
+    Activation* lin = new LinearActivation();
+
+    std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> allConn;
+
+    mainGen.fullyConnect(0, 0, lin, lin, allConn, xavierNormalInit, seed);
+
+    Neat::genomeToNetwork(mainGen, mainNetwork);
+}
+
+void MainWindow::on_pushButton_newPmc_clicked()
+{
+    newNetType = NewNetwork::PMC;
+    ui->label_netPath->setText("New PMC");
+
+    Activation* tanh = new TanhActivation();
+    Activation* lin = new LinearActivation();
+
+    std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> allConn;
+
+    bool validNum;
+
+    int layer = ui->lineEdit_layer->text().toInt(&validNum);
+
+    if(validNum == false)
+    {
+        ui->label_mainResult->setText("Error layer is not a number");
+    }
+
+    int nodes = ui->lineEdit_nodes->text().toInt(&validNum);
+
+    if(validNum == false)
+    {
+        ui->label_mainResult->setText("Error nodes is not a number");
+    }
+
+    mainGen.fullyConnect(layer, nodes, tanh, lin, allConn, xavierNormalInit, seed);
+
+    Neat::genomeToNetwork(mainGen, mainNetwork);
+}
+
+
+void MainWindow::on_pushButton_newRbf_clicked()
+{
+    newNetType = NewNetwork::RBF;
+    ui->label_netPath->setText("New RBF");
+
+    Activation* lin = new LinearActivation();
+    Activation* gauss = new GaussianActivation();
+
+    std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> allConn;
+
+    bool validNum;
+
+    int layer = ui->lineEdit_layer->text().toInt(&validNum);
+
+    if(validNum == false)
+    {
+        ui->label_mainResult->setText("Error layer is not a number");
+    }
+
+    int nodes = ui->lineEdit_nodes->text().toInt(&validNum);
+
+    if(validNum == false)
+    {
+        ui->label_mainResult->setText("Error nodes is not a number");
+    }
+
+    mainGen.fullyConnect(layer, nodes, gauss, lin, allConn, xavierNormalInit, seed);
+
+    Neat::genomeToNetwork(mainGen, mainNetwork);
+}
+
+
+void MainWindow::on_pushButton_pickTraining_clicked()
+{
+    QString fileName = QFileDialog::getExistingDirectory(this,"Choose training folder");
+
+    if (fileName.isEmpty())
+        return;
+
+    trainingFolder = fileName;
+}
+
+
+void MainWindow::on_pushButton_pickTest_clicked()
+{
+    QString fileName = QFileDialog::getExistingDirectory(this,"Choose test folder");
+
+    if (fileName.isEmpty())
+        return;
+
+    testFolder = fileName;
+}
+
+
+void MainWindow::on_pushButton_save_clicked()
+{
+    mainNetwork.applyBackprop(mainGen);
+    mainGen.saveCurrentGenome(ui->lineEdit_fileName->text().toStdString());
 }
 

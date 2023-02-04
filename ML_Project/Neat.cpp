@@ -39,7 +39,7 @@ Neat::Neat(unsigned int _populationSize, unsigned int _input, unsigned int _outp
 
 	for (int i = 0; i < initPop.size(); i++)
 	{
-		for (std::map<unsigned int, GeneConnection>::iterator it = initPop[i].getConnections()->begin(); it != initPop[i].getConnections()->end(); ++it)
+        for (std::map<unsigned int, GeneConnection>::iterator it = initPop[i].getConnections()->begin(); it != initPop[i].getConnections()->end(); ++it)
 		{
 			allConnections.emplace(std::pair<int, int>(it->second.getNodeA(), it->second.getNodeB()), it->first);
 		}
@@ -214,13 +214,13 @@ void Neat::genomeToNetwork(Genome& genome, NeuralNetwork& network)
 {
 	network.clear();
 
-	std::vector<GeneNode>* nodes = genome.getNodes();
-	std::vector<std::pair<unsigned int, unsigned int>> nodePosition;//Stores postion of the nodes in the network
-	nodePosition.reserve(nodes->size());
+    std::vector<GeneNode>* nodes = genome.getNodes();
+    std::vector<std::pair<unsigned int, unsigned int>> nodePosition;//Stores postion of the nodes in the network
+    //nodePosition.reserve(nodes->size());
 
 	//Add the nodes to the layer
 	int i = 0;
-	for (std::vector<GeneNode>::iterator node = nodes->begin(); node != nodes->end(); ++node, ++i)
+    for (std::vector<GeneNode>::iterator node = nodes->begin(); node != nodes->end(); ++node, ++i)
 	{
 		unsigned int layer = node->getLayer();
 
@@ -561,7 +561,7 @@ void Neat::evolve()
 	float restWorkload = 0;
 
 	std::deque<std::atomic<bool>> tickets;
-
+	
 #ifdef MULTITHREAD
 	while (workload < 1)
 	{
@@ -598,13 +598,9 @@ void Neat::evolve()
 	}
 #endif // MULTITHREAD
 
-	count += currentWorkload;
+	currentWorkload = totalWorkload - count;
 
-	while (count > totalWorkload)
-	{
-		currentWorkload--;
-		count--;
-	}
+	count += currentWorkload;
 
 	reproduce(currentWorkload, itSortedSpecies, newBornIndex, sortedSpecies, futureGen, &lock);
 
@@ -984,8 +980,8 @@ float Neat::distance(Genome& genomeA, Genome& genomeB)
 		genome2 = &genomeB;
 	}
 
-	std::map<unsigned int, GeneConnection>::const_iterator it1 = genome1->getConnections()->cbegin();
-	std::map<unsigned int, GeneConnection>::const_iterator it2 = genome2->getConnections()->cbegin();
+    std::map<unsigned int, GeneConnection>::const_iterator it1 = genome1->getConnections()->cbegin();
+    std::map<unsigned int, GeneConnection>::const_iterator it2 = genome2->getConnections()->cbegin();
 	int count = 0;
 
 	float disjoint = 0;
@@ -1003,7 +999,7 @@ float Neat::distance(Genome& genomeA, Genome& genomeB)
 			//similargene
 			similar++;
 			
-			weightDiff = abs(it1->second.getWeight() - it2->second.getWeight()) * weightDiff;
+			weightDiff = abs(it1->second.getWeight() - it2->second.getWeight()) * neatParam.weightCoeff;
 			
 			++it1; count++;
 			++it2;

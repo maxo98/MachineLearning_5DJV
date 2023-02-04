@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QPainter>
+#include "NeuralNetwork.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -13,10 +14,16 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
+    enum class NewNetwork{LINEAR, PMC, RBF};
+
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
     void drawCube(int x, int y, QPainter& paint);
+
+    float test();
+
+    void loadData(std::deque<std::vector<float>>& input, std::deque<std::vector<float>>& output, const QString& folder);
 
 private slots:
     void on_pushButton_PMC_clicked();
@@ -33,10 +40,34 @@ private slots:
 
     void on_pushButton_test4_clicked();
 
+    void on_pushButton_train_clicked();
+
+    void on_pushButton_test_clicked();
+
+    void on_pushButton_pick_clicked();
+
+    void on_pushButton_newLinear_clicked();
+
+    void on_pushButton_newPmc_clicked();
+
+    void on_pushButton_newRbf_clicked();
+
+    void on_pushButton_pickTraining_clicked();
+
+    void on_pushButton_pickTest_clicked();
+
+    void on_pushButton_save_clicked();
+
 private:
     Ui::MainWindow *ui;
 
-    QString model = "linear";
+    QString model = "linear";//for basic test only
     long long seed;
+
+    NewNetwork newNetType = NewNetwork::LINEAR;//For main subject
+    QString trainingFolder = "";
+    QString testFolder = "";
+    NeuralNetwork mainNetwork;
+    Genome mainGen;
 };
 #endif // MAINWINDOW_H

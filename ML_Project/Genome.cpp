@@ -3,6 +3,7 @@
 
 #include "Genome.h"
 #include <stack>
+#include <QDebug>
 
 Genome::Genome()
 {
@@ -534,7 +535,9 @@ Genome Genome::loadGenome(const std::string& fileName)
     
     while (getline(file, line))
     {
+#ifdef DEBUG
         std::cout << line << std::endl;
+#endif // DEBUG
 
         std::vector<std::string> stringSplited;
         int idxStart, idxEnd;
@@ -592,11 +595,25 @@ void Genome::addHiddenNode(Activation* activation, unsigned int layer)
 void Genome::fullyConnect(int nLayer, int nNode, Activation* hiddenActivation, Activation* outputActivation, std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int>& allConnections,
     WeightInitFunction weightInit, const long long& seed)
 {
+    if(input == 0 || output == 0)
+    {
+        qDebug() << "Can't fully connect, input or output is 0";
+        return;
+    }
+
     nodes.clear();
 
     connections.clear();
     nodesToConnection.clear();
     orderAddedCon.clear();
+
+    nodes.reserve(input + output + nLayer * nNode);
+
+    int connReserve = input * nNode + pow(nLayer * nNode, nLayer) + output * nNode;
+
+    orderAddedCon.reserve(connReserve);
+    nodesToConnection.reserve(connReserve);
+    //connections.reserve(connReserve);
 
     for (unsigned int i = 0; i < input; i++)
     {
@@ -613,7 +630,7 @@ void Genome::fullyConnect(int nLayer, int nNode, Activation* hiddenActivation, A
                 int in = (i == 0 ? input : nNode);
                 int out = (i == (nLayer - 1) ? output : nNode);
 
-                nodes.push_back(std::move(GeneNode(NODE_TYPE::HIDDEN, hiddenActivation, i + 1)));
+                nodes.push_back(GeneNode(NODE_TYPE::HIDDEN, hiddenActivation, i + 1));
 
                 if (i == 0)
                 {
