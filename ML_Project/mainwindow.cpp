@@ -821,7 +821,7 @@ float MainWindow::test()
 
 void MainWindow::loadData(std::deque<std::vector<float>>& input, std::deque<std::vector<float>>& output, const QString& folder)
 {
-    QString strList[3] = {"/Homme", "/Femme", "/Autre"};
+    QString strList[3] = {"/Hommes", "/Femmes", "/Autres"};
 
     int count = 0;
 
