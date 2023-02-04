@@ -55,7 +55,6 @@ public:
     QLabel *label_model_5;
     QLabel *label_image;
     QPushButton *pushButton_pickTraining;
-    QPushButton *pushButton_pickTest;
     QLabel *label_model_6;
     QLineEdit *lineEdit_layer;
     QLabel *label_model_7;
@@ -167,9 +166,6 @@ public:
         pushButton_pickTraining = new QPushButton(tab_2);
         pushButton_pickTraining->setObjectName("pushButton_pickTraining");
         pushButton_pickTraining->setGeometry(QRect(10, 380, 101, 51));
-        pushButton_pickTest = new QPushButton(tab_2);
-        pushButton_pickTest->setObjectName("pushButton_pickTest");
-        pushButton_pickTest->setGeometry(QRect(10, 440, 101, 51));
         label_model_6 = new QLabel(tab_2);
         label_model_6->setObjectName("label_model_6");
         label_model_6->setGeometry(QRect(290, 270, 121, 21));
@@ -239,8 +235,7 @@ public:
         lineEdit_fileName->setText(QCoreApplication::translate("MainWindow", "linear", nullptr));
         label_model_5->setText(QCoreApplication::translate("MainWindow", "File name", nullptr));
         label_image->setText(QString());
-        pushButton_pickTraining->setText(QCoreApplication::translate("MainWindow", "Pick training data", nullptr));
-        pushButton_pickTest->setText(QCoreApplication::translate("MainWindow", "Pick test data", nullptr));
+        pushButton_pickTraining->setText(QCoreApplication::translate("MainWindow", "Pick data", nullptr));
         label_model_6->setText(QCoreApplication::translate("MainWindow", "Number of layer", nullptr));
         lineEdit_layer->setText(QCoreApplication::translate("MainWindow", "2", nullptr));
         label_model_7->setText(QCoreApplication::translate("MainWindow", "Number of nodes", nullptr));

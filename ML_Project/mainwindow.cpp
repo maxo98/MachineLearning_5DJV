@@ -709,7 +709,7 @@ void MainWindow::on_pushButton_test4_clicked()
 
 void MainWindow::on_pushButton_train_clicked()
 {
-    if(trainingFolder == "")
+    if(dataFolder == "")
     {
         ui->label_mainResult->setText("No training data set, please pick one");
         return;
@@ -719,7 +719,7 @@ void MainWindow::on_pushButton_train_clicked()
 
     std::deque<std::vector<float>> input, output;
 
-    loadData(input, output, trainingFolder);
+    loadData(input, output, dataFolder, true);
 
     bool validNum;
     double epoch = double(ui->lineEdit_epoch->text().toInt(&validNum));
@@ -762,7 +762,7 @@ void MainWindow::on_pushButton_test_clicked()
 
 float MainWindow::test()
 {
-    if(testFolder == "")
+    if(dataFolder == "")
     {
         ui->label_mainResult->setText("No test data set, please pick one");
         return 0;
@@ -774,7 +774,7 @@ float MainWindow::test()
 
     std::vector<float> test;
 
-    loadData(input, output, testFolder);
+    loadData(input, output, dataFolder, false);
 
     float score = 0;
 
@@ -819,7 +819,7 @@ float MainWindow::test()
     return score;
 }
 
-void MainWindow::loadData(std::deque<std::vector<float>>& input, std::deque<std::vector<float>>& output, const QString& folder)
+void MainWindow::loadData(std::deque<std::vector<float>>& input, std::deque<std::vector<float>>& output, const QString& folder, bool training)
 {
     QString strList[3] = {"/Hommes", "/Femmes", "/Autres"};
 
@@ -827,7 +827,16 @@ void MainWindow::loadData(std::deque<std::vector<float>>& input, std::deque<std:
 
     for(int i2 = 0; i2 < 3; i2++)
     {
-        QDir dir(folder + strList[i2]);
+        QString path = folder + strList[i2];
+
+        if(training == true)
+        {
+            path += "/80%";
+        }else{
+            path += "/20%";
+        }
+
+        QDir dir(path);
         QStringList filter;
 
         filter << QLatin1String("*.png");
@@ -985,18 +994,7 @@ void MainWindow::on_pushButton_pickTraining_clicked()
     if (fileName.isEmpty())
         return;
 
-    trainingFolder = fileName;
-}
-
-
-void MainWindow::on_pushButton_pickTest_clicked()
-{
-    QString fileName = QFileDialog::getExistingDirectory(this,"Choose test folder");
-
-    if (fileName.isEmpty())
-        return;
-
-    testFolder = fileName;
+    dataFolder = fileName;
 }
 
 

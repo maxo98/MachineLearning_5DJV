@@ -23,7 +23,7 @@ public:
 
     float test();
 
-    void loadData(std::deque<std::vector<float>>& input, std::deque<std::vector<float>>& output, const QString& folder);
+    void loadData(std::deque<std::vector<float>>& input, std::deque<std::vector<float>>& output, const QString& folder, bool training);
 
 private slots:
     void on_pushButton_PMC_clicked();
@@ -54,8 +54,6 @@ private slots:
 
     void on_pushButton_pickTraining_clicked();
 
-    void on_pushButton_pickTest_clicked();
-
     void on_pushButton_save_clicked();
 
 private:
@@ -65,8 +63,7 @@ private:
     long long seed;
 
     NewNetwork newNetType = NewNetwork::LINEAR;//For main subject
-    QString trainingFolder = "";
-    QString testFolder = "";
+    QString dataFolder = "";
     NeuralNetwork mainNetwork;
     Genome mainGen;
 };

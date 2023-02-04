@@ -387,20 +387,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>Pick training data</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButton_pickTest">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>440</y>
-        <width>101</width>
-        <height>51</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Pick test data</string>
+       <string>Pick data</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_model_6">
