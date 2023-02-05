@@ -822,6 +822,8 @@ void MainWindow::train()
 
     ui->label_mainResult->setText("Training");
 
+    ui->label_progress->setText("Progress: " + QString::number(percent) + "%");
+
     for (int i = 0; i < epoch; i++)
     {
         int index = randInt(0, input.size()-1);
