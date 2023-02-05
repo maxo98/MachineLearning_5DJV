@@ -1054,7 +1054,7 @@ void MainWindow::on_pushButton_newPmc_clicked()
             ui->label_mainResult->setText("Error nodes is not a number");
         }
 
-        mainGen.fullyConnect(layer, nodes, tanh, lin, allConn, xavierUniformInit, seed);
+        mainGen.fullyConnect(layer, nodes, tanh, lin, allConn, heUniformInit, seed);
 
         Neat::genomeToNetwork(mainGen, mainNetwork);
 
