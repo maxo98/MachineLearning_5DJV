@@ -162,9 +162,12 @@ inline float xavierUniformInit(int input, int out, const long long& seed)
 }
 
 //Normalized xavier: mean 0, variance sqrt(6.f) / sqrt(nInput + nOutput) where nInput is the umber of connection entering, and nOutput the number of connections coming out
-inline float xavierNormalInit(int input, int out, const long long& seed)
+/*inline float xavierNormalInit(int input, int out, const long long& seed)
 {
     std::normal_distribution<float> normalDist(0.0, sqrt(6.f) / sqrt(float(input + out)));
     std::default_random_engine generator (seed);
-    return randPosNeg() * randFloat() * normalDist(generator);
-}
+
+    std::cout << normalDist(generator)<< std::endl;
+
+    return randPosNeg() * normalDist(generator);
+}*/

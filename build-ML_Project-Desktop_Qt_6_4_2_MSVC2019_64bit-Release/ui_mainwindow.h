@@ -15,7 +15,6 @@
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
-#include <QtWidgets/QProgressBar>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QTabWidget>
@@ -50,7 +49,6 @@ public:
     QPushButton *pushButton_newPmc;
     QPushButton *pushButton_newRbf;
     QLabel *label_mainResult;
-    QProgressBar *progressBar;
     QLineEdit *lineEdit_fileName;
     QLabel *label_model_5;
     QLabel *label_image;
@@ -62,6 +60,7 @@ public:
     QPushButton *pushButton_save;
     QLabel *label_model_8;
     QLineEdit *lineEdit_lRate;
+    QLabel *label_progress;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -134,10 +133,10 @@ public:
         pushButton_newLinear->setGeometry(QRect(130, 140, 141, 51));
         lineEdit_epoch = new QLineEdit(tab_2);
         lineEdit_epoch->setObjectName("lineEdit_epoch");
-        lineEdit_epoch->setGeometry(QRect(140, 210, 113, 21));
+        lineEdit_epoch->setGeometry(QRect(140, 200, 113, 21));
         label_model_3 = new QLabel(tab_2);
         label_model_3->setObjectName("label_model_3");
-        label_model_3->setGeometry(QRect(10, 210, 111, 21));
+        label_model_3->setGeometry(QRect(10, 200, 111, 21));
         label_model_3->setFont(font1);
         pushButton_newPmc = new QPushButton(tab_2);
         pushButton_newPmc->setObjectName("pushButton_newPmc");
@@ -147,12 +146,8 @@ public:
         pushButton_newRbf->setGeometry(QRect(430, 140, 141, 51));
         label_mainResult = new QLabel(tab_2);
         label_mainResult->setObjectName("label_mainResult");
-        label_mainResult->setGeometry(QRect(310, 210, 331, 31));
+        label_mainResult->setGeometry(QRect(310, 210, 431, 41));
         label_mainResult->setFont(font);
-        progressBar = new QProgressBar(tab_2);
-        progressBar->setObjectName("progressBar");
-        progressBar->setGeometry(QRect(30, 240, 221, 23));
-        progressBar->setValue(0);
         lineEdit_fileName = new QLineEdit(tab_2);
         lineEdit_fileName->setObjectName("lineEdit_fileName");
         lineEdit_fileName->setGeometry(QRect(130, 270, 113, 21));
@@ -190,6 +185,10 @@ public:
         lineEdit_lRate = new QLineEdit(tab_2);
         lineEdit_lRate->setObjectName("lineEdit_lRate");
         lineEdit_lRate->setGeometry(QRect(420, 300, 51, 21));
+        label_progress = new QLabel(tab_2);
+        label_progress->setObjectName("label_progress");
+        label_progress->setGeometry(QRect(10, 220, 291, 41));
+        label_progress->setFont(font);
         tabWidget->addTab(tab_2, QString());
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
@@ -227,7 +226,7 @@ public:
         pushButton_test->setText(QCoreApplication::translate("MainWindow", "Test", nullptr));
         pushButton_pick->setText(QCoreApplication::translate("MainWindow", "Pick network", nullptr));
         pushButton_newLinear->setText(QCoreApplication::translate("MainWindow", "New linear", nullptr));
-        lineEdit_epoch->setText(QCoreApplication::translate("MainWindow", "15", nullptr));
+        lineEdit_epoch->setText(QCoreApplication::translate("MainWindow", "100", nullptr));
         label_model_3->setText(QCoreApplication::translate("MainWindow", "Training epoch", nullptr));
         pushButton_newPmc->setText(QCoreApplication::translate("MainWindow", "New PMC", nullptr));
         pushButton_newRbf->setText(QCoreApplication::translate("MainWindow", "New RBF", nullptr));
@@ -243,6 +242,7 @@ public:
         pushButton_save->setText(QCoreApplication::translate("MainWindow", "Save", nullptr));
         label_model_8->setText(QCoreApplication::translate("MainWindow", "Learning rate", nullptr));
         lineEdit_lRate->setText(QCoreApplication::translate("MainWindow", "0.01", nullptr));
+        label_progress->setText(QCoreApplication::translate("MainWindow", "Progress:", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_2), QCoreApplication::translate("MainWindow", "Main subject", nullptr));
     } // retranslateUi
 

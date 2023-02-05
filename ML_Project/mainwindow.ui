@@ -249,20 +249,20 @@
       <property name="geometry">
        <rect>
         <x>140</x>
-        <y>210</y>
+        <y>200</y>
         <width>113</width>
         <height>21</height>
        </rect>
       </property>
       <property name="text">
-       <string>15</string>
+       <string>100</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_model_3">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>210</y>
+        <y>200</y>
         <width>111</width>
         <height>21</height>
        </rect>
@@ -307,8 +307,8 @@
        <rect>
         <x>310</x>
         <y>210</y>
-        <width>331</width>
-        <height>31</height>
+        <width>431</width>
+        <height>41</height>
        </rect>
       </property>
       <property name="font">
@@ -318,19 +318,6 @@
       </property>
       <property name="text">
        <string>Result:</string>
-      </property>
-     </widget>
-     <widget class="QProgressBar" name="progressBar">
-      <property name="geometry">
-       <rect>
-        <x>30</x>
-        <y>240</y>
-        <width>221</width>
-        <height>23</height>
-       </rect>
-      </property>
-      <property name="value">
-       <number>0</number>
       </property>
      </widget>
      <widget class="QLineEdit" name="lineEdit_fileName">
@@ -494,6 +481,24 @@
       </property>
       <property name="text">
        <string>0.01</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_progress">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>220</y>
+        <width>291</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>14</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Progress:</string>
       </property>
      </widget>
     </widget>

@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
+#include <QDebug>
 #include "Node.h"
 
 Node::Node(Activation* _activation, int _id)
@@ -73,6 +73,11 @@ float Node::compute()
 
 		backpropValue = value;
 		value = activation->activate(value);
+
+        /*if(isnan(value))
+        {
+            value = 0;
+        }*/
 
 		computed = true;
 	}

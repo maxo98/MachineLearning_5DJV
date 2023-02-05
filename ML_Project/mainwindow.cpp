@@ -6,6 +6,7 @@
 #include "Neat.h"
 #include <random>
 #include <QFileDialog>
+#include "ThreadPool.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -25,6 +26,8 @@ MainWindow::MainWindow(QWidget *parent)
     arrActiv.push_back(lin);
     mainGen = Genome(380*380*3+1, 3, arrActiv);
 
+    ThreadPool* pool = ThreadPool::getInstance();
+    pool->start();
 }
 
 MainWindow::~MainWindow()
@@ -59,502 +62,540 @@ void MainWindow::on_pushButton_RBF_clicked()
 
 void MainWindow::on_pushButton_test1_clicked()
 {
-    ui->label_result->setText("Result: pending");
-
-    int h = ui->label->height();
-    int w = ui->label->width();
-    QPixmap pix(w, h);
-    QPainter paint(&pix);
-    pix.fill( Qt::white );
-
-    std::vector<int> blueX, blueY, redX, redY;
-
-
-    blueX.push_back(w/3.5f);
-    blueY.push_back(h/3.5f);
-    redX.push_back(w/3.5f * 2);
-    redY.push_back(h/3.5f * 3);
-    redX.push_back(w/3.5f * 3);
-    redY.push_back(h/3.5f * 3);
-
-    NeuralNetwork network;
-
-    Activation* tanh = new TanhActivation();
-    Activation* sig = new SigmoidActivation();
-    Activation* gauss = new GaussianActivation();
-    Activation* lin = new LinearActivation();
-
-    std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> allConn;
-
-    std::vector<Activation*> arrActiv;
-    arrActiv.push_back(lin);
-    Genome gen(3, 1, arrActiv);
-
-    float normalizedXavier = 1/sqrt(3.f);
-
-    if(model == "linear")
+    if(lockBaseTest.try_lock() == true)
     {
-        gen.addConnection(0, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(1, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(2, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
+        ui->label_result->setText("Result: pending");
 
-        Neat::genomeToNetwork(gen, network);
-    }else if(model == "PMC")
-    {
-        gen.addConnection(0, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(1, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(2, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
+        int h = ui->label->height();
+        int w = ui->label->width();
+        QPixmap pix(w, h);
+        QPainter paint(&pix);
+        pix.fill( Qt::white );
 
-        Neat::genomeToNetwork(gen, network);
-    }else if(model == "RBF")
-    {
-        gen.addConnection(0, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(1, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(2, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-
-        Neat::genomeToNetwork(gen, network);
-    }
-
-    std::vector<std::vector<float>> input, output;
-
-    input.resize(3);
-    output.resize(3);
-
-    input[0].push_back(blueX[0]/float(w));
-    input[0].push_back(blueY[0]/float(h));
-    input[0].push_back(1);
-    output[0].push_back(-1);
-
-    input[1].push_back(redX[0]/float(w));
-    input[1].push_back(redY[0]/float(h));
-    input[1].push_back(1);
-    output[1].push_back(1);
-
-    input[2].push_back(redX[1]/float(w));
-    input[2].push_back(redY[1]/float(h));
-    input[2].push_back(1);
-    output[2].push_back(1);
+        std::vector<int> blueX, blueY, redX, redY;
 
 
-    for (int i = 0; i < 100000; i++)
-    {
-        int index = randInt(0, 2);
+        blueX.push_back(w/3.5f);
+        blueY.push_back(h/3.5f);
+        redX.push_back(w/3.5f * 2);
+        redY.push_back(h/3.5f * 3);
+        redX.push_back(w/3.5f * 3);
+        redY.push_back(h/3.5f * 3);
 
-        network.backprop(input[index], output[index], 0.1, true);
-    }
+        NeuralNetwork network;
 
-    //network.applyBackprop(gen);
+        Activation* tanh = new TanhActivation();
+        Activation* sig = new SigmoidActivation();
+        Activation* gauss = new GaussianActivation();
+        Activation* lin = new LinearActivation();
 
-    //Neat::genomeToNetwork(gen, network);
+        std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> allConn;
 
-    for(int i = 0; i < w; i++)
-    {
-        for(int j = 0; j < h; j++)
+        std::vector<Activation*> arrActiv;
+        arrActiv.push_back(lin);
+        Genome gen(3, 1, arrActiv);
+
+        float normalizedXavier = 1/sqrt(3.f);
+
+        if(model == "linear")
         {
-            input[0][0] = i/float(w);
-            input[0][1] = j/float(h);
-            network.compute(input[0], output[0]);
+            gen.addConnection(0, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
+            gen.addConnection(1, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
+            gen.addConnection(2, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
 
-            if(output[0][0] > 0.f)
+            Neat::genomeToNetwork(gen, network);
+        }else if(model == "PMC")
+        {
+            gen.addConnection(0, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
+            gen.addConnection(1, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
+            gen.addConnection(2, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
+
+            Neat::genomeToNetwork(gen, network);
+        }else if(model == "RBF")
+        {
+            gen.addConnection(0, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
+            gen.addConnection(1, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
+            gen.addConnection(2, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
+
+            Neat::genomeToNetwork(gen, network);
+        }
+
+        std::vector<std::vector<float>> input, output;
+
+        input.resize(3);
+        output.resize(3);
+
+        input[0].push_back(blueX[0]/float(w));
+        input[0].push_back(blueY[0]/float(h));
+        input[0].push_back(1);
+        output[0].push_back(-1);
+
+        input[1].push_back(redX[0]/float(w));
+        input[1].push_back(redY[0]/float(h));
+        input[1].push_back(1);
+        output[1].push_back(1);
+
+        input[2].push_back(redX[1]/float(w));
+        input[2].push_back(redY[1]/float(h));
+        input[2].push_back(1);
+        output[2].push_back(1);
+
+
+        for (int i = 0; i < 100000; i++)
+        {
+            int index = randInt(0, 2);
+
+            network.backprop(input[index], output[index], 0.1, true);
+        }
+
+        //network.applyBackprop(gen);
+
+        //Neat::genomeToNetwork(gen, network);
+
+        for(int i = 0; i < w; i++)
+        {
+            for(int j = 0; j < h; j++)
             {
-                paint.setPen(QColor(128, 0, 0, 255));
-            }else{
-                paint.setPen(QColor(0, 0, 128, 255));
+                input[0][0] = i/float(w);
+                input[0][1] = j/float(h);
+                network.compute(input[0], output[0]);
+
+                if(output[0][0] > 0.f)
+                {
+                    paint.setPen(QColor(128, 0, 0, 255));
+                }else{
+                    paint.setPen(QColor(0, 0, 128, 255));
+                }
+
+                paint.drawRect(QRect(i,j,1,1));
             }
-
-            paint.drawRect(QRect(i,j,1,1));
         }
-    }
 
-    bool validated = true;
-    QImage imgTest = pix.toImage();
+        bool validated = true;
+        QImage imgTest = pix.toImage();
 
-    for(int i = 0; i < blueX.size(); i++)
-    {
-        if(imgTest.pixel(blueX[i], blueY[i]) != QColor(0, 0, 128).rgb())
+        for(int i = 0; i < blueX.size(); i++)
         {
-            validated = false;
-            qDebug() << "blue " << imgTest.pixelColor(blueX[i], blueY[i]).red() << " " << imgTest.pixelColor(blueX[i], blueY[i]).green() << " " << imgTest.pixelColor(blueX[i], blueY[i]).blue();
+            if(imgTest.pixel(blueX[i], blueY[i]) != QColor(0, 0, 128).rgb())
+            {
+                validated = false;
+                qDebug() << "blue " << imgTest.pixelColor(blueX[i], blueY[i]).red() << " " << imgTest.pixelColor(blueX[i], blueY[i]).green() << " " << imgTest.pixelColor(blueX[i], blueY[i]).blue();
+            }
         }
-    }
 
-    for(int i = 0; i < redX.size(); i++)
-    {
-        if(imgTest.pixel(redX[i], redY[i]) != QColor(128, 0, 0).rgb())
+        for(int i = 0; i < redX.size(); i++)
         {
-            validated = false;
-            qDebug() << "red " << imgTest.pixelColor(redX[i], redY[i]).red() << " " << imgTest.pixelColor(redX[i], redY[i]).green() << " " << imgTest.pixelColor(redX[i], redY[i]).blue();
+            if(imgTest.pixel(redX[i], redY[i]) != QColor(128, 0, 0).rgb())
+            {
+                validated = false;
+                qDebug() << "red " << imgTest.pixelColor(redX[i], redY[i]).red() << " " << imgTest.pixelColor(redX[i], redY[i]).green() << " " << imgTest.pixelColor(redX[i], redY[i]).blue();
+            }
         }
-    }
 
-    paint.setPen(QColor(0, 0, 255, 255));
+        paint.setPen(QColor(0, 0, 255, 255));
 
-    for(int i = 0; i < blueX.size(); i++)
-    {
-        drawCube(blueX[i], blueY[i], paint);
-
-        if(imgTest.pixel(blueX[i], blueY[i]) != QColor(0, 0, 128).rgb())
+        for(int i = 0; i < blueX.size(); i++)
         {
-            validated = false;
-            qDebug() << "blue " << imgTest.pixelColor(blueX[i], blueY[i]).red() << " " << imgTest.pixelColor(blueX[i], blueY[i]).green() << " " << imgTest.pixelColor(blueX[i], blueY[i]).blue();
+            drawCube(blueX[i], blueY[i], paint);
+
+            if(imgTest.pixel(blueX[i], blueY[i]) != QColor(0, 0, 128).rgb())
+            {
+                validated = false;
+                qDebug() << "blue " << imgTest.pixelColor(blueX[i], blueY[i]).red() << " " << imgTest.pixelColor(blueX[i], blueY[i]).green() << " " << imgTest.pixelColor(blueX[i], blueY[i]).blue();
+            }
         }
-    }
 
-    paint.setPen(QColor(255, 0, 0, 255));
+        paint.setPen(QColor(255, 0, 0, 255));
 
-    for(int i = 0; i < redX.size(); i++)
-    {
-        drawCube(redX[i], redY[i], paint);
-
-        if(imgTest.pixel(redX[i], redY[i]) != QColor(128, 0, 0).rgb())
+        for(int i = 0; i < redX.size(); i++)
         {
-            validated = false;
-            qDebug() << "red " << imgTest.pixelColor(redX[i], redY[i]).red() << " " << imgTest.pixelColor(redX[i], redY[i]).green() << " " << imgTest.pixelColor(redX[i], redY[i]).blue();
+            drawCube(redX[i], redY[i], paint);
+
+            if(imgTest.pixel(redX[i], redY[i]) != QColor(128, 0, 0).rgb())
+            {
+                validated = false;
+                qDebug() << "red " << imgTest.pixelColor(redX[i], redY[i]).red() << " " << imgTest.pixelColor(redX[i], redY[i]).green() << " " << imgTest.pixelColor(redX[i], redY[i]).blue();
+            }
         }
+
+        if(validated == true)
+        {
+            ui->label_result->setText("Result: OK");
+        }else{
+            ui->label_result->setText("Result: KO");
+        }
+
+        ui->label->setPixmap(pix);
+
+        lockBaseTest.unlock();
+
+        delete tanh;
+        delete sig;
+        delete lin;
+        delete gauss;
     }
 
-    if(validated == true)
-    {
-        ui->label_result->setText("Result: OK");
-    }else{
-        ui->label_result->setText("Result: KO");
-    }
-
-    ui->label->setPixmap(pix);
 }
 
 
 void MainWindow::on_pushButton_test2_clicked()
 {
-    ui->label_result->setText("Result: pending");
-
-    int h = ui->label->height();
-    int w = ui->label->width();
-    QPixmap pix(w, h);
-    QPainter paint(&pix);
-    pix.fill( Qt::white );
-
-    std::vector<int> blueX, blueY, redX, redY;
-
-    for(int i = 0; i < 10; i++)
+    if(lockBaseTest.try_lock() == true)
     {
-        blueX.push_back(randInt(0, 250));
-        blueY.push_back(randInt(0, 250));
-        redX.push_back(randInt(251, 499));
-        redY.push_back(randInt(251, 499));
-    }
+        ui->label_result->setText("Result: pending");
 
-    NeuralNetwork network;
+        int h = ui->label->height();
+        int w = ui->label->width();
+        QPixmap pix(w, h);
+        QPainter paint(&pix);
+        pix.fill( Qt::white );
 
-    Activation* tanh = new TanhActivation();
-    Activation* gauss = new GaussianActivation();
-    Activation* lin = new LinearActivation();
+        std::vector<int> blueX, blueY, redX, redY;
 
-    std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> allConn;
-
-    std::vector<Activation*> arrActiv;
-    arrActiv.push_back(lin);
-
-    Genome gen(3, 1, arrActiv);
-
-    float normalizedXavier = 1/sqrt(3.f);
-
-    if(model == "linear")
-    {
-        gen.addConnection(0, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(1, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(2, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-
-        Neat::genomeToNetwork(gen, network);
-    }else if(model == "PMC")
-    {
-        gen.addConnection(0, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(1, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(2, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-
-        Neat::genomeToNetwork(gen, network);
-    }else if(model == "RBF")
-    {
-        gen.addConnection(0, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(1, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(2, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-
-        Neat::genomeToNetwork(gen, network);
-    }
-
-    std::vector<std::vector<float>> input, output;
-
-    input.resize(20);
-    output.resize(20);
-
-    for(int i = 0; i < 10; i++)
-    {
-        input[i].push_back(blueX[i]/float(w));
-        input[i].push_back(blueY[i]/float(h));
-        input[i].push_back(1);
-        output[i].push_back(-1);
-    }
-
-    for(int i = 0; i < 10; i++)
-    {
-        input[i+10].push_back(redX[i]/float(w));
-        input[i+10].push_back(redY[i]/float(h));
-        input[i+10].push_back(1);
-        output[i+10].push_back(1);
-    }
-
-    for (int i = 0; i < 100000; i++)
-    {
-        int index = randInt(0, 19);
-
-        network.backprop(input[index], output[index], 0.1, true);
-    }
-    //network.applyBackprop(gen);
-
-    //Neat::genomeToNetwork(gen, network);
-
-
-    for(int i = 0; i < w; i++)
-    {
-        for(int j = 0; j < h; j++)
+        for(int i = 0; i < 10; i++)
         {
-            input[0][0] = i/float(w);
-            input[0][1] = j/float(h);
-            network.compute(input[0], output[0]);
+            blueX.push_back(randInt(0, 250));
+            blueY.push_back(randInt(0, 250));
+            redX.push_back(randInt(251, 499));
+            redY.push_back(randInt(251, 499));
+        }
 
-            if(output[0][0] > 0)
+        NeuralNetwork network;
+
+        Activation* tanh = new TanhActivation();
+        Activation* gauss = new GaussianActivation();
+        Activation* lin = new LinearActivation();
+
+        std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> allConn;
+
+        std::vector<Activation*> arrActiv;
+        arrActiv.push_back(lin);
+
+        Genome gen(3, 1, arrActiv);
+
+        float normalizedXavier = 1/sqrt(3.f);
+
+        if(model == "linear")
+        {
+            gen.addConnection(0, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
+            gen.addConnection(1, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
+            gen.addConnection(2, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
+
+            Neat::genomeToNetwork(gen, network);
+        }else if(model == "PMC")
+        {
+            gen.addConnection(0, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
+            gen.addConnection(1, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
+            gen.addConnection(2, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
+
+            Neat::genomeToNetwork(gen, network);
+        }else if(model == "RBF")
+        {
+            gen.addConnection(0, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
+            gen.addConnection(1, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
+            gen.addConnection(2, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
+
+            Neat::genomeToNetwork(gen, network);
+        }
+
+        std::vector<std::vector<float>> input, output;
+
+        input.resize(20);
+        output.resize(20);
+
+        for(int i = 0; i < 10; i++)
+        {
+            input[i].push_back(blueX[i]/float(w));
+            input[i].push_back(blueY[i]/float(h));
+            input[i].push_back(1);
+            output[i].push_back(-1);
+        }
+
+        for(int i = 0; i < 10; i++)
+        {
+            input[i+10].push_back(redX[i]/float(w));
+            input[i+10].push_back(redY[i]/float(h));
+            input[i+10].push_back(1);
+            output[i+10].push_back(1);
+        }
+
+        for (int i = 0; i < 500000; i++)
+        {
+            int index = randInt(0, 19);
+
+            network.backprop(input[index], output[index], 0.1, true);
+        }
+        //network.applyBackprop(gen);
+
+        //Neat::genomeToNetwork(gen, network);
+
+
+        for(int i = 0; i < w; i++)
+        {
+            for(int j = 0; j < h; j++)
             {
-                paint.setPen(QColor(128, 0, 0, 255));
-            }else{
-                paint.setPen(QColor(0, 0, 128, 255));
+                input[0][0] = i/float(w);
+                input[0][1] = j/float(h);
+                network.compute(input[0], output[0]);
+
+                if(output[0][0] > 0)
+                {
+                    paint.setPen(QColor(128, 0, 0, 255));
+                }else{
+                    paint.setPen(QColor(0, 0, 128, 255));
+                }
+
+                paint.drawRect(QRect(i,j,1,1));
             }
-
-            paint.drawRect(QRect(i,j,1,1));
         }
-    }
 
-    bool validated = true;
-    QImage imgTest = pix.toImage();
+        bool validated = true;
+        QImage imgTest = pix.toImage();
 
-    for(int i = 0; i < 10; i++)
-    {
-        if(imgTest.pixel(blueX[i], blueY[i]) != QColor(0, 0, 128).rgb())
+        for(int i = 0; i < 10; i++)
         {
-            validated = false;
-            qDebug() << "blue " << imgTest.pixel(blueX[i], blueY[i]);
+            if(imgTest.pixel(blueX[i], blueY[i]) != QColor(0, 0, 128).rgb())
+            {
+                validated = false;
+                qDebug() << "blue " << imgTest.pixel(blueX[i], blueY[i]);
+            }
         }
-    }
 
-    paint.setPen(QColor(255, 0, 0, 255));
+        paint.setPen(QColor(255, 0, 0, 255));
 
-    for(int i = 0; i < 10; i++)
-    {
-        if(imgTest.pixel(redX[i], redY[i]) != QColor(128, 0, 0).rgb())
+        for(int i = 0; i < 10; i++)
         {
-            validated = false;
-            qDebug() << "red " << imgTest.pixel(redX[i], redY[i]);
+            if(imgTest.pixel(redX[i], redY[i]) != QColor(128, 0, 0).rgb())
+            {
+                validated = false;
+                qDebug() << "red " << imgTest.pixel(redX[i], redY[i]);
+            }
         }
+
+
+        paint.setPen(QColor(0, 0, 255, 255));
+
+        for(int i = 0; i < 10; i++)
+        {
+            drawCube(blueX[i], blueY[i], paint);
+        }
+
+        paint.setPen(QColor(255, 0, 0, 255));
+
+        for(int i = 0; i < 10; i++)
+        {
+            drawCube(redX[i], redY[i], paint);
+        }
+
+        if(validated == true)
+        {
+            ui->label_result->setText("Result: OK");
+        }else{
+            ui->label_result->setText("Result: KO");
+        }
+
+        ui->label->setPixmap(pix);
+
+        lockBaseTest.unlock();
+
+        delete tanh;
+        delete lin;
+        delete gauss;
     }
-
-
-    paint.setPen(QColor(0, 0, 255, 255));
-
-    for(int i = 0; i < 10; i++)
-    {
-        drawCube(blueX[i], blueY[i], paint);
-    }
-
-    paint.setPen(QColor(255, 0, 0, 255));
-
-    for(int i = 0; i < 10; i++)
-    {
-        drawCube(redX[i], redY[i], paint);
-    }
-
-    if(validated == true)
-    {
-        ui->label_result->setText("Result: OK");
-    }else{
-        ui->label_result->setText("Result: KO");
-    }
-
-    ui->label->setPixmap(pix);
 }
 
 
 void MainWindow::on_pushButton_test3_clicked()
 {
-
-    ui->label_result->setText("Result: pending");
-
-    int h = ui->label->height();
-    int w = ui->label->width();
-    QPixmap pix(w, h);
-    QPainter paint(&pix);
-    pix.fill( Qt::white );
-
-    std::vector<int> blueX, blueY, redX, redY;
-
-
-    blueX.push_back(1);
-    blueY.push_back(1);
-    blueX.push_back(w-1);
-    blueY.push_back(h-1);
-    redX.push_back(w-1);
-    redY.push_back(1);
-    redX.push_back(1);
-    redY.push_back(h-1);
-
-    NeuralNetwork network;
-
-    Activation* tanh = new TanhActivation();
-    Activation* lin = new LinearActivation();
-    Activation* sig = new SigmoidActivation();
-    Activation* gauss = new GaussianActivation();
-
-    std::vector<Activation*> arrActiv;
-    arrActiv.push_back(lin);
-
-    std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> allConn;
-
-    Genome gen(3, 1, arrActiv);
-    float normalizedXavier = 1/sqrt(3.f);
-
-    if(model == "linear")
+    if(lockBaseTest.try_lock() == true)
     {
-        gen.addConnection(0, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(1, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-        gen.addConnection(2, 3, allConn, 0);
+        ui->label_result->setText("Result: pending");
 
-        Neat::genomeToNetwork(gen, network);
-    }else if(model == "PMC")
-    {
-        qDebug() << "PMC";
+        int h = ui->label->height();
+        int w = ui->label->width();
+        QPixmap pix(w, h);
+        QPainter paint(&pix);
+        pix.fill( Qt::white );
 
-        gen.fullyConnect(1, 2, sig, lin, allConn, xavierNormalInit, seed);
-
-        Neat::genomeToNetwork(gen, network);
-    }else if(model == "RBF")
-    {
-        qDebug() << "RBF";
-
-        gen.fullyConnect(1, 2, gauss, lin, allConn, xavierNormalInit, seed);
-        Neat::genomeToNetwork(gen, network);
-    }
-
-    std::vector<std::vector<float>> input, output;
-
-    input.resize(4);
-    output.resize(4);
-
-    input[0].push_back(blueX[0]/float(w));
-    input[0].push_back(blueY[0]/float(h));
-    input[0].push_back(1);
-    output[0].push_back(0);
-
-    input[1].push_back(redX[0]/float(w));
-    input[1].push_back(redY[0]/float(h));
-    input[1].push_back(1);
-    output[1].push_back(1);
-
-    input[2].push_back(blueX[1]/float(w));
-    input[2].push_back(blueY[1]/float(h));
-    input[2].push_back(1);
-    output[2].push_back(0);
+        std::vector<int> blueX, blueY, redX, redY;
 
 
-    input[3].push_back(redX[1]/float(w));
-    input[3].push_back(redY[1]/float(h));
-    input[3].push_back(1);
-    output[3].push_back(1);
+        blueX.push_back(1);
+        blueY.push_back(1);
+        blueX.push_back(w-1);
+        blueY.push_back(h-1);
+        redX.push_back(w-1);
+        redY.push_back(1);
+        redX.push_back(1);
+        redY.push_back(h-1);
 
+        NeuralNetwork network;
 
-    for (int i = 0; i < 100000; i++)
-    {
-        int index = randInt(0, 3);
+        Activation* tanh = new TanhActivation();
+        Activation* lin = new LinearActivation();
+        Activation* sig = new SigmoidActivation();
+        Activation* gauss = new GaussianActivation();
 
-        network.backprop(input[index], output[index], 0.1, true);
-    }
-    //network.applyBackprop(gen);
+        std::vector<Activation*> arrActiv;
+        arrActiv.push_back(lin);
 
-    //Neat::genomeToNetwork(gen, network);
+        std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> allConn;
 
-    for(int i = 0; i < w; i++)
-    {
-        for(int j = 0; j < h; j++)
+        Genome gen(3, 1, arrActiv);
+        float normalizedXavier = 1/sqrt(3.f);
+
+        if(model == "linear")
         {
-            input[0][0] = i/float(w);
-            input[0][1] = j/float(h);
-            network.compute(input[0], output[0]);
+            gen.addConnection(0, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
+            gen.addConnection(1, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
+            gen.addConnection(2, 3, allConn, 0);
 
-            if(output[0][0] > 0.5)
+            Neat::genomeToNetwork(gen, network);
+        }else if(model == "PMC")
+        {
+            qDebug() << "PMC";
+
+            gen.fullyConnect(1, 2, sig, lin, allConn, xavierUniformInit, seed);
+
+            Neat::genomeToNetwork(gen, network);
+        }else if(model == "RBF")
+        {
+            qDebug() << "RBF";
+
+            gen.fullyConnect(1, 2, gauss, lin, allConn, xavierUniformInit, seed);
+            Neat::genomeToNetwork(gen, network);
+        }
+
+        std::vector<std::vector<float>> input, output;
+
+        input.resize(4);
+        output.resize(4);
+
+        input[0].push_back(blueX[0]/float(w));
+        input[0].push_back(blueY[0]/float(h));
+        input[0].push_back(1);
+        output[0].push_back(0);
+
+        input[1].push_back(redX[0]/float(w));
+        input[1].push_back(redY[0]/float(h));
+        input[1].push_back(1);
+        output[1].push_back(1);
+
+        input[2].push_back(blueX[1]/float(w));
+        input[2].push_back(blueY[1]/float(h));
+        input[2].push_back(1);
+        output[2].push_back(0);
+
+
+        input[3].push_back(redX[1]/float(w));
+        input[3].push_back(redY[1]/float(h));
+        input[3].push_back(1);
+        output[3].push_back(1);
+
+
+        for (int i = 0; i < 500000; i++)
+        {
+            int index = randInt(0, 3);
+
+            network.backprop(input[index], output[index], 0.1, true);
+        }
+        //network.applyBackprop(gen);
+
+        //Neat::genomeToNetwork(gen, network);
+
+        for(int i = 0; i < w; i++)
+        {
+            for(int j = 0; j < h; j++)
             {
-                paint.setPen(QColor(128, 0, 0, 255));
-            }else{
-                paint.setPen(QColor(0, 0, 128, 255));
+                input[0][0] = i/float(w);
+                input[0][1] = j/float(h);
+                network.compute(input[0], output[0]);
+
+                if(output[0][0] > 0.5)
+                {
+                    paint.setPen(QColor(128, 0, 0, 255));
+                }else{
+                    paint.setPen(QColor(0, 0, 128, 255));
+                }
+
+                paint.drawRect(QRect(i,j,1,1));
             }
-
-            paint.drawRect(QRect(i,j,1,1));
         }
-    }
 
-    bool validated = true;
-    QImage imgTest = pix.toImage();
+        bool validated = true;
+        QImage imgTest = pix.toImage();
 
-    for(int i = 0; i < blueX.size(); i++)
-    {
-        if(imgTest.pixel(blueX[i], blueY[i]) != QColor(0, 0, 128).rgb())
+        for(int i = 0; i < blueX.size(); i++)
         {
-            /*input[0][0] = blueX[i]/float(w);
-            input[0][1] = blueY[i]/float(h);
-            network.compute(input[0], output[0]);
-            qDebug() << output[0];*/
-            validated = false;
-            qDebug() << "blue " << imgTest.pixelColor(blueX[i], blueY[i]).red() << " " << imgTest.pixelColor(blueX[i], blueY[i]).green() << " " << imgTest.pixelColor(blueX[i], blueY[i]).blue();
+            if(imgTest.pixel(blueX[i], blueY[i]) != QColor(0, 0, 128).rgb())
+            {
+                /*input[0][0] = blueX[i]/float(w);
+                input[0][1] = blueY[i]/float(h);
+                network.compute(input[0], output[0]);
+                qDebug() << output[0];*/
+                validated = false;
+                qDebug() << "blue " << imgTest.pixelColor(blueX[i], blueY[i]).red() << " " << imgTest.pixelColor(blueX[i], blueY[i]).green() << " " << imgTest.pixelColor(blueX[i], blueY[i]).blue();
+            }
         }
-    }
 
-    for(int i = 0; i < redX.size(); i++)
-    {
-        if(imgTest.pixel(redX[i], redY[i]) != QColor(128, 0, 0).rgb())
+        for(int i = 0; i < redX.size(); i++)
         {
-            /*input[0][0] = redX[i]/float(w);
-            input[0][1] = redY[i]/float(h);
-            network.compute(input[0], output[0]);
-            qDebug() << output[0];*/
-            validated = false;
-            qDebug() << "red " << imgTest.pixelColor(redX[i], redY[i]).red() << " " << imgTest.pixelColor(redX[i], redY[i]).green() << " " << imgTest.pixelColor(redX[i], redY[i]).blue();
+            if(imgTest.pixel(redX[i], redY[i]) != QColor(128, 0, 0).rgb())
+            {
+                /*input[0][0] = redX[i]/float(w);
+                input[0][1] = redY[i]/float(h);
+                network.compute(input[0], output[0]);
+                qDebug() << output[0];*/
+                validated = false;
+                qDebug() << "red " << imgTest.pixelColor(redX[i], redY[i]).red() << " " << imgTest.pixelColor(redX[i], redY[i]).green() << " " << imgTest.pixelColor(redX[i], redY[i]).blue();
+            }
         }
+
+        paint.setPen(QColor(0, 0, 255, 255));
+
+        for(int i = 0; i < blueX.size(); i++)
+        {
+            drawCube(blueX[i], blueY[i], paint);
+        }
+
+        paint.setPen(QColor(255, 0, 0, 255));
+
+        for(int i = 0; i < redX.size(); i++)
+        {
+            drawCube(redX[i], redY[i], paint);
+        }
+
+        if(validated == true)
+        {
+            ui->label_result->setText("Result: OK");
+        }else{
+            ui->label_result->setText("Result: KO");
+        }
+
+        ui->label->setPixmap(pix);
+
+        lockBaseTest.unlock();
+
+        delete tanh;
+        delete sig;
+        delete lin;
+        delete gauss;
     }
-
-    paint.setPen(QColor(0, 0, 255, 255));
-
-    for(int i = 0; i < blueX.size(); i++)
-    {
-        drawCube(blueX[i], blueY[i], paint);
-    }
-
-    paint.setPen(QColor(255, 0, 0, 255));
-
-    for(int i = 0; i < redX.size(); i++)
-    {
-        drawCube(redX[i], redY[i], paint);
-    }
-
-    if(validated == true)
-    {
-        ui->label_result->setText("Result: OK");
-    }else{
-        ui->label_result->setText("Result: KO");
-    }
-
-    ui->label->setPixmap(pix);
-
 }
 
 
 void MainWindow::on_pushButton_test4_clicked()
 {
+    qDebug() << "hello";
+    //test4Thread();
+    ThreadPool* pool = ThreadPool::getInstance();
+    pool->queueJob(&MainWindow::test4Thread, this);
+}
+
+void MainWindow::test4Thread()
+{
+    qDebug() << "hey";
+    lockBaseTest.lock();
     std::default_random_engine generator (seed);
     ui->label_result->setText("Result: pending");
 
@@ -590,19 +631,19 @@ void MainWindow::on_pushButton_test4_clicked()
 
     if(model == "linear")
     {
-        gen.fullyConnect(0, 0, gauss, lin, allConn, xavierNormalInit, seed);
+        gen.fullyConnect(0, 0, gauss, lin, allConn, xavierUniformInit, seed);
 
         Neat::genomeToNetwork(gen, network);
     }else if(model == "PMC")
     {
-        gen.fullyConnect(1, 4, tanh, lin, allConn, xavierNormalInit, seed);
+        gen.fullyConnect(1, 4, tanh, lin, allConn, xavierUniformInit, seed);
 
         Neat::genomeToNetwork(gen, network);
     }else if(model == "RBF")
     {
         qDebug() << "RBF";
 
-        gen.fullyConnect(1, 4, gauss, lin, allConn, xavierNormalInit, seed);
+        gen.fullyConnect(1, 4, gauss, lin, allConn, xavierUniformInit, seed);
 
         Neat::genomeToNetwork(gen, network);
     }
@@ -629,11 +670,20 @@ void MainWindow::on_pushButton_test4_clicked()
         }
     }
 
+    unsigned int percent = 0;
+
     for (int i = 0; i < 50000000; i++)
     {
         int index = randInt(0, 999);
 
         network.backprop(input[index], output[index], 0.05 * sig->activate(0.5f - (i/10000000.f)*4), true);
+
+        if(i % 500000 == 0)
+        {
+            percent++;
+            qDebug() << percent;
+            ui->label_result->setText("Result: pending " + QString::number(percent) + "%");
+        }
     }
 
 
@@ -704,20 +754,36 @@ void MainWindow::on_pushButton_test4_clicked()
     }
 
     ui->label->setPixmap(pix);
+
+    lockBaseTest.unlock();
+
+    delete tanh;
+    delete sig;
+    delete lin;
+    delete gauss;
 }
 
 
 void MainWindow::on_pushButton_train_clicked()
 {
+    ThreadPool* pool = ThreadPool::getInstance();
+    pool->queueJob(&MainWindow::train, this);
+}
+
+void MainWindow::train()
+{
+    lockMainTest.lock();
+
     if(dataFolder == "")
     {
         ui->label_mainResult->setText("No training data set, please pick one");
+        lockMainTest.unlock();
         return;
     }
 
-    Activation* sig = new SigmoidActivation();
-
     std::deque<std::vector<float>> input, output;
+
+    ui->label_mainResult->setText("Loading data");
 
     loadData(input, output, dataFolder, true);
 
@@ -727,6 +793,7 @@ void MainWindow::on_pushButton_train_clicked()
     if(validNum == false)
     {
         ui->label_mainResult->setText("Error epoch is not a number");
+        lockMainTest.unlock();
         return;
     }
 
@@ -735,6 +802,7 @@ void MainWindow::on_pushButton_train_clicked()
     if(validNum == false)
     {
         ui->label_mainResult->setText("Error learning rate is not a number");
+        lockMainTest.unlock();
         return;
     }
 
@@ -742,22 +810,38 @@ void MainWindow::on_pushButton_train_clicked()
     qDebug() << output.size() << " " << output[0].size();
     qDebug() << epoch;
 
+    unsigned int percent = 0;
+    unsigned int div = epoch/100.f;
+
+    if(div == 0) div = 1;
+
+    ui->label_mainResult->setText("Training");
+
     for (int i = 0; i < epoch; i++)
     {
         int index = randInt(0, input.size()-1);
 
-        qDebug() << i << " " << input[index].size() << " " << output[index].size();
-
         mainNetwork.backprop(input[index], output[index], lRate, false);
+
+        if((i+1) % div == 0)
+        {
+            percent++;
+            qDebug() << percent;
+
+            ui->label_progress->setText("Progress: " + QString::number(percent) + "%");
+        }
     }
 
     test();
+    lockMainTest.unlock();
 }
 
 
 void MainWindow::on_pushButton_test_clicked()
 {
+    lockMainTest.lock();
     test();
+    lockMainTest.unlock();
 }
 
 float MainWindow::test()
@@ -769,6 +853,7 @@ float MainWindow::test()
     }
 
     qDebug() << "Start test";
+    ui->label_mainResult->setText("Result pending");
 
     std::deque<std::vector<float>> input, output;
 
@@ -814,7 +899,7 @@ float MainWindow::test()
 
     qDebug() << QString::number(score);
 
-    ui->label_mainResult->setText("Result: " + QString::number(score));
+    ui->label_mainResult->setText("Result: " + QString::number(score) + "%");
 
     return score;
 }
@@ -891,116 +976,154 @@ void MainWindow::loadData(std::deque<std::vector<float>>& input, std::deque<std:
 
 void MainWindow::on_pushButton_pick_clicked()
 {
-    QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Pick network"), "", tr("*"));
+    if(lockMainTest.try_lock() == true)
+    {
+        QString fileName = QFileDialog::getOpenFileName(this,
+            tr("Pick network"), "", tr("*"));
 
-    if (fileName.isEmpty())
-        return;
+        if (fileName.isEmpty())
+        {
+            lockMainTest.unlock();
+            return;
+        }
 
-    Activation* lin = new LinearActivation();
-    std::vector<Activation*> arrActiv;
-    arrActiv.push_back(lin);
+        Activation* lin = new LinearActivation();
+        std::vector<Activation*> arrActiv;
+        arrActiv.push_back(lin);
 
-    mainGen.loadGenome(fileName.toStdString());
+        mainGen.loadGenome(fileName.toStdString());
 
-    Neat::genomeToNetwork(mainGen, mainNetwork);
+        Neat::genomeToNetwork(mainGen, mainNetwork);
 
-    ui->label_netPath->setText(fileName);
+        ui->label_netPath->setText(fileName);
+
+        lockMainTest.unlock();
+    }
 }
 
 
 void MainWindow::on_pushButton_newLinear_clicked()
 {
-    newNetType = NewNetwork::LINEAR;
-    ui->label_netPath->setText("New linear");
+    if(lockMainTest.try_lock() == true)
+    {
+        newNetType = NewNetwork::LINEAR;
+        ui->label_netPath->setText("New linear");
 
-    Activation* lin = new LinearActivation();
+        Activation* lin = new LinearActivation();
 
-    std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> allConn;
+        std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> allConn;
 
-    mainGen.fullyConnect(0, 0, lin, lin, allConn, xavierNormalInit, seed);
+        mainGen.fullyConnect(0, 0, lin, lin, allConn, xavierUniformInit, seed);
 
-    Neat::genomeToNetwork(mainGen, mainNetwork);
+        Neat::genomeToNetwork(mainGen, mainNetwork);
+
+        lockMainTest.unlock();
+    }
 }
 
 void MainWindow::on_pushButton_newPmc_clicked()
 {
-    newNetType = NewNetwork::PMC;
-    ui->label_netPath->setText("New PMC");
-
-    Activation* tanh = new TanhActivation();
-    Activation* lin = new LinearActivation();
-
-    std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> allConn;
-
-    bool validNum;
-
-    int layer = ui->lineEdit_layer->text().toInt(&validNum);
-
-    if(validNum == false)
+    if(lockMainTest.try_lock() == true)
     {
-        ui->label_mainResult->setText("Error layer is not a number");
+        newNetType = NewNetwork::PMC;
+        ui->label_netPath->setText("New PMC");
+
+        Activation* tanh = new TanhActivation();
+        Activation* lin = new LinearActivation();
+
+        std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> allConn;
+
+        bool validNum;
+
+        int layer = ui->lineEdit_layer->text().toInt(&validNum);
+
+        if(validNum == false)
+        {
+            ui->label_mainResult->setText("Error layer is not a number");
+        }
+
+        int nodes = ui->lineEdit_nodes->text().toInt(&validNum);
+
+        if(validNum == false)
+        {
+            ui->label_mainResult->setText("Error nodes is not a number");
+        }
+
+        mainGen.fullyConnect(layer, nodes, tanh, lin, allConn, xavierUniformInit, seed);
+
+        Neat::genomeToNetwork(mainGen, mainNetwork);
+
+        lockMainTest.unlock();
     }
-
-    int nodes = ui->lineEdit_nodes->text().toInt(&validNum);
-
-    if(validNum == false)
-    {
-        ui->label_mainResult->setText("Error nodes is not a number");
-    }
-
-    mainGen.fullyConnect(layer, nodes, tanh, lin, allConn, xavierNormalInit, seed);
-
-    Neat::genomeToNetwork(mainGen, mainNetwork);
 }
 
 
 void MainWindow::on_pushButton_newRbf_clicked()
 {
-    newNetType = NewNetwork::RBF;
-    ui->label_netPath->setText("New RBF");
-
-    Activation* lin = new LinearActivation();
-    Activation* gauss = new GaussianActivation();
-
-    std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> allConn;
-
-    bool validNum;
-
-    int layer = ui->lineEdit_layer->text().toInt(&validNum);
-
-    if(validNum == false)
+    if(lockMainTest.try_lock() == true)
     {
-        ui->label_mainResult->setText("Error layer is not a number");
+        newNetType = NewNetwork::RBF;
+        ui->label_netPath->setText("New RBF");
+
+        Activation* lin = new LinearActivation();
+        Activation* gauss = new GaussianActivation();
+
+        std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> allConn;
+
+        bool validNum;
+
+        int layer = ui->lineEdit_layer->text().toInt(&validNum);
+
+        if(validNum == false)
+        {
+            ui->label_mainResult->setText("Error layer is not a number");
+        }
+
+        int nodes = ui->lineEdit_nodes->text().toInt(&validNum);
+
+        if(validNum == false)
+        {
+            ui->label_mainResult->setText("Error nodes is not a number");
+        }
+
+        mainGen.fullyConnect(layer, nodes, gauss, lin, allConn, xavierUniformInit, seed);
+
+        Neat::genomeToNetwork(mainGen, mainNetwork);
+
+        lockMainTest.unlock();
     }
-
-    int nodes = ui->lineEdit_nodes->text().toInt(&validNum);
-
-    if(validNum == false)
-    {
-        ui->label_mainResult->setText("Error nodes is not a number");
-    }
-
-    mainGen.fullyConnect(layer, nodes, gauss, lin, allConn, xavierNormalInit, seed);
-
-    Neat::genomeToNetwork(mainGen, mainNetwork);
 }
 
 
 void MainWindow::on_pushButton_pickTraining_clicked()
 {
-    QString fileName = QFileDialog::getExistingDirectory(this,"Choose training folder");
+    if(lockMainTest.try_lock() == true)
+    {
+        QString fileName = QFileDialog::getExistingDirectory(this,"Choose training folder");
 
-    if (fileName.isEmpty())
-        return;
+        if (fileName.isEmpty())
+        {
+            lockMainTest.unlock();
+            return;
+        }
 
-    dataFolder = fileName;
+        dataFolder = fileName;
+
+        lockMainTest.unlock();
+    }
 }
 
 
 void MainWindow::on_pushButton_save_clicked()
 {
-    mainNetwork.applyBackprop(mainGen);
-    mainGen.saveCurrentGenome(ui->lineEdit_fileName->text().toStdString());
+    if(lockMainTest.try_lock() == true)
+    {
+        mainNetwork.applyBackprop(mainGen);
+        mainGen.saveCurrentGenome(ui->lineEdit_fileName->text().toStdString());
+
+        ui->label_mainResult->setText("Network saved");
+
+        lockMainTest.unlock();
+    }
 }
 

@@ -4,6 +4,7 @@
 #include "NeuralNetwork.h"
 #include <limits>
 #include "ThreadPool.h"
+#include <QDebug>
 
 NeuralNetwork::NeuralNetwork()
 {
@@ -318,7 +319,7 @@ void NeuralNetwork::splitLayerComputing(std::deque<Node>::iterator it, int size,
 
     std::deque<std::atomic<bool>> tickets;
 
-    while (workload < 10 && cpus > 2)
+    while (workload < 1 && cpus > 2)
     {
         cpus--;
         workload = totalWorkload / cpus;
@@ -415,8 +416,13 @@ bool NeuralNetwork::backprop(const std::vector<float>& inputs, const std::vector
                 for (int cpt = 0; cpt < it->previousNodes.size(); cpt++)
                 {
                     it->previousNodes[cpt].first->delta += it->previousNodes[cpt].second * it->delta;
+
                     it->previousNodes[cpt].second -= learnRate * it->delta * it->previousNodes[cpt].first->value;//Update weights
-                    //qDebug() << it->previousNodes[cpt].second;
+
+                    if(isfinite(it->previousNodes[cpt].second) == false)
+                    {
+                        qDebug() << it->previousNodes[cpt].second;
+                    }
                 }
             }
 
@@ -431,8 +437,8 @@ bool NeuralNetwork::backprop(const std::vector<float>& inputs, const std::vector
                     for (int cpt = 0; cpt < itNode->previousNodes.size(); cpt++)
                     {
                         itNode->previousNodes[cpt].first->delta += itNode->previousNodes[cpt].second * itNode->delta;
+
                         itNode->previousNodes[cpt].second -= learnRate * itNode->delta * itNode->previousNodes[cpt].first->value;//Update weights
-                        //qDebug() << itNode->previousNodes[cpt].second;
                     }
                 }
             }

@@ -25,6 +25,9 @@ public:
 
     void loadData(std::deque<std::vector<float>>& input, std::deque<std::vector<float>>& output, const QString& folder, bool training);
 
+    void test4Thread();
+    void train();
+
 private slots:
     void on_pushButton_PMC_clicked();
 
@@ -66,5 +69,8 @@ private:
     QString dataFolder = "";
     NeuralNetwork mainNetwork;
     Genome mainGen;
+
+    std::mutex lockBaseTest;
+    std::mutex lockMainTest;
 };
 #endif // MAINWINDOW_H
