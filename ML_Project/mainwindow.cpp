@@ -798,7 +798,7 @@ void MainWindow::train()
     {
         int index = randInt(0, input.size()-1);
 
-        mainNetwork.backprop(input[index], output[index], lRate, false);
+        mainNetwork.backprop(input[index], output[index], lRate, true);
 
         if((i+1) % div == 0)
         {
