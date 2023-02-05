@@ -61,6 +61,7 @@ public:
     QLabel *label_model_8;
     QLineEdit *lineEdit_lRate;
     QLabel *label_progress;
+    QPushButton *pushButton_unitTest;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -157,7 +158,7 @@ public:
         label_model_5->setFont(font1);
         label_image = new QLabel(tab_2);
         label_image->setObjectName("label_image");
-        label_image->setGeometry(QRect(150, 340, 500, 500));
+        label_image->setGeometry(QRect(150, 340, 380, 380));
         pushButton_pickTraining = new QPushButton(tab_2);
         pushButton_pickTraining->setObjectName("pushButton_pickTraining");
         pushButton_pickTraining->setGeometry(QRect(10, 380, 101, 51));
@@ -189,6 +190,9 @@ public:
         label_progress->setObjectName("label_progress");
         label_progress->setGeometry(QRect(10, 220, 291, 41));
         label_progress->setFont(font);
+        pushButton_unitTest = new QPushButton(tab_2);
+        pushButton_unitTest->setObjectName("pushButton_unitTest");
+        pushButton_unitTest->setGeometry(QRect(580, 140, 141, 51));
         tabWidget->addTab(tab_2, QString());
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
@@ -243,6 +247,7 @@ public:
         label_model_8->setText(QCoreApplication::translate("MainWindow", "Learning rate", nullptr));
         lineEdit_lRate->setText(QCoreApplication::translate("MainWindow", "0.01", nullptr));
         label_progress->setText(QCoreApplication::translate("MainWindow", "Progress:", nullptr));
+        pushButton_unitTest->setText(QCoreApplication::translate("MainWindow", "Single Test", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_2), QCoreApplication::translate("MainWindow", "Main subject", nullptr));
     } // retranslateUi
 

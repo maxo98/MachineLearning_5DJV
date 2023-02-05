@@ -356,8 +356,8 @@
        <rect>
         <x>150</x>
         <y>340</y>
-        <width>500</width>
-        <height>500</height>
+        <width>380</width>
+        <height>380</height>
        </rect>
       </property>
       <property name="text">
@@ -499,6 +499,19 @@
       </property>
       <property name="text">
        <string>Progress:</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_unitTest">
+      <property name="geometry">
+       <rect>
+        <x>580</x>
+        <y>140</y>
+        <width>141</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Single Test</string>
       </property>
      </widget>
     </widget>

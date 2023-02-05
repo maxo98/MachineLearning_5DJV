@@ -59,6 +59,8 @@ private slots:
 
     void on_pushButton_save_clicked();
 
+    void on_pushButton_unitTest_clicked();
+
 private:
     Ui::MainWindow *ui;
 

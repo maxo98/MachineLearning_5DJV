@@ -772,14 +772,19 @@ void MainWindow::on_pushButton_train_clicked()
 
 void MainWindow::train()
 {
-    lockMainTest.lock();
+    if(ui->label_netPath->text() == "Pick a network")
+    {
+        ui->label_mainResult->setText("Pick a network");
+        return;
+    }
 
     if(dataFolder == "")
     {
         ui->label_mainResult->setText("No training data set, please pick one");
-        lockMainTest.unlock();
         return;
     }
+
+    lockMainTest.lock();
 
     std::deque<std::vector<float>> input, output;
 
@@ -1123,6 +1128,75 @@ void MainWindow::on_pushButton_save_clicked()
 
         ui->label_mainResult->setText("Network saved");
 
+        lockMainTest.unlock();
+    }
+}
+
+
+void MainWindow::on_pushButton_unitTest_clicked()
+{
+    if(lockMainTest.try_lock() == true)
+    {
+        QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
+                                                        "",
+                                                        tr("Images (*.png *.xpm *.jpg)"));
+
+        if(!fileName.isEmpty())
+        {
+            std::vector<float> input;
+            std::vector<float> output;
+
+            QImage image(fileName);
+
+            if(image.width() != 380 && image.height() != 380)
+            {
+                ui->label_mainResult->setText("Image is of the wrong size");
+                lockMainTest.unlock();
+                return;
+            }
+
+            input.resize(380*380*3+1);
+
+            for(int x = 0; x < 308; x++)
+            {
+                for(int y = 0; y < 380; y++)
+                {
+                    QColor color = image.pixelColor(x, y);
+
+                    input[x * 380 * 3 + y * 3] = color.redF();
+                    input[x * 380 * 3 + y * 3] = color.greenF();
+                    input[x * 380 * 3 + y * 3] = color.blueF();
+                }
+            }
+
+            input[380*380*3] = 0.5f;//Bias
+
+            mainNetwork.compute(input, output);
+
+            int maxIndex = 0;
+
+            qDebug() << output[0];
+
+            for(int cpt = 1; cpt < 3; cpt++)
+            {
+                qDebug() << output[cpt];
+
+                if(output[maxIndex] < output[cpt])
+                {
+                    maxIndex = cpt;
+                }
+            }
+
+            QString strList[3] = {"Hommes", "Femmes", "Autres"};
+
+            ui->label_mainResult->setText("Result " + strList[maxIndex]);
+
+            QPixmap pixmap(fileName);
+            ui->label_image->setPixmap(pixmap);
+            //ui->label_image->setMask(pixmap.mask());
+
+            //ui->label_image->show();
+        }
         lockMainTest.unlock();
     }
 }
