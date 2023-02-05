@@ -20,8 +20,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->setupUi(this);
 
-    Activation* lin = new LinearActivation();
-
     std::vector<Activation*> arrActiv;
     arrActiv.push_back(lin);
     mainGen = Genome(380*380*3+1, 3, arrActiv);
@@ -32,6 +30,11 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+    delete tanh;
+    delete sig;
+    delete gauss;
+    delete lin;
+
     delete ui;
 }
 
@@ -83,11 +86,6 @@ void MainWindow::on_pushButton_test1_clicked()
         redY.push_back(h/3.5f * 3);
 
         NeuralNetwork network;
-
-        Activation* tanh = new TanhActivation();
-        Activation* sig = new SigmoidActivation();
-        Activation* gauss = new GaussianActivation();
-        Activation* lin = new LinearActivation();
 
         std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> allConn;
 
@@ -228,11 +226,6 @@ void MainWindow::on_pushButton_test1_clicked()
         ui->label->setPixmap(pix);
 
         lockBaseTest.unlock();
-
-        delete tanh;
-        delete sig;
-        delete lin;
-        delete gauss;
     }
 
 }
@@ -261,10 +254,6 @@ void MainWindow::on_pushButton_test2_clicked()
         }
 
         NeuralNetwork network;
-
-        Activation* tanh = new TanhActivation();
-        Activation* gauss = new GaussianActivation();
-        Activation* lin = new LinearActivation();
 
         std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> allConn;
 
@@ -397,10 +386,6 @@ void MainWindow::on_pushButton_test2_clicked()
         ui->label->setPixmap(pix);
 
         lockBaseTest.unlock();
-
-        delete tanh;
-        delete lin;
-        delete gauss;
     }
 }
 
@@ -431,13 +416,8 @@ void MainWindow::on_pushButton_test3_clicked()
 
         NeuralNetwork network;
 
-        Activation* tanh = new TanhActivation();
-        Activation* lin = new LinearActivation();
-        Activation* sig = new SigmoidActivation();
-        Activation* gauss = new GaussianActivation();
-
         std::vector<Activation*> arrActiv;
-        arrActiv.push_back(lin);
+        arrActiv.push_back(tanh);
 
         std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> allConn;
 
@@ -455,14 +435,14 @@ void MainWindow::on_pushButton_test3_clicked()
         {
             qDebug() << "PMC";
 
-            gen.fullyConnect(1, 2, sig, lin, allConn, xavierUniformInit, seed);
+            gen.fullyConnect(1, 2, sig, tanh, allConn, xavierUniformInit, seed);
 
             Neat::genomeToNetwork(gen, network);
         }else if(model == "RBF")
         {
             qDebug() << "RBF";
 
-            gen.fullyConnect(1, 2, gauss, lin, allConn, xavierUniformInit, seed);
+            gen.fullyConnect(1, 2, gauss, tanh, allConn, xavierUniformInit, seed);
             Neat::genomeToNetwork(gen, network);
         }
 
@@ -575,11 +555,6 @@ void MainWindow::on_pushButton_test3_clicked()
         ui->label->setPixmap(pix);
 
         lockBaseTest.unlock();
-
-        delete tanh;
-        delete sig;
-        delete lin;
-        delete gauss;
     }
 }
 
@@ -617,33 +592,33 @@ void MainWindow::test4Thread()
 
     NeuralNetwork network;
 
-    Activation* tanh = new TanhActivation();
-    Activation* sig = new SigmoidActivation();
-    Activation* lin = new LinearActivation();
-    Activation* gauss = new GaussianActivation();
-
     std::vector<Activation*> arrActiv;
-    arrActiv.push_back(lin);
+    arrActiv.push_back(tanh);
 
     std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> allConn;
 
     Genome gen(3, 1, arrActiv);
 
+    int epoch = 10000000;
+    int div = 100000;
+
     if(model == "linear")
     {
-        gen.fullyConnect(0, 0, gauss, lin, allConn, xavierUniformInit, seed);
+        gen.fullyConnect(0, 0, gauss, tanh, allConn, xavierUniformInit, seed);
 
         Neat::genomeToNetwork(gen, network);
     }else if(model == "PMC")
     {
-        gen.fullyConnect(1, 4, tanh, lin, allConn, xavierUniformInit, seed);
+        epoch *= 5;
+        div *= 5;
+        gen.fullyConnect(1, 4, tanh, tanh, allConn, xavierUniformInit, seed);
 
         Neat::genomeToNetwork(gen, network);
     }else if(model == "RBF")
     {
         qDebug() << "RBF";
 
-        gen.fullyConnect(1, 4, gauss, lin, allConn, xavierUniformInit, seed);
+        gen.fullyConnect(1, 4, gauss, tanh, allConn, xavierUniformInit, seed);
 
         Neat::genomeToNetwork(gen, network);
     }
@@ -672,13 +647,13 @@ void MainWindow::test4Thread()
 
     unsigned int percent = 0;
 
-    for (int i = 0; i < 50000000; i++)
+    for (int i = 0; i < epoch; i++)
     {
         int index = randInt(0, 999);
 
         network.backprop(input[index], output[index], 0.05 * sig->activate(0.5f - (i/10000000.f)*4), true);
 
-        if(i % 500000 == 0)
+        if(i % div == 0)
         {
             percent++;
             qDebug() << percent;
@@ -756,11 +731,6 @@ void MainWindow::test4Thread()
     ui->label->setPixmap(pix);
 
     lockBaseTest.unlock();
-
-    delete tanh;
-    delete sig;
-    delete lin;
-    delete gauss;
 }
 
 
@@ -994,7 +964,6 @@ void MainWindow::on_pushButton_pick_clicked()
             return;
         }
 
-        Activation* lin = new LinearActivation();
         std::vector<Activation*> arrActiv;
         arrActiv.push_back(lin);
 
@@ -1016,11 +985,9 @@ void MainWindow::on_pushButton_newLinear_clicked()
         newNetType = NewNetwork::LINEAR;
         ui->label_netPath->setText("New linear");
 
-        Activation* lin = new LinearActivation();
-
         std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> allConn;
 
-        mainGen.fullyConnect(0, 0, lin, lin, allConn, xavierUniformInit, seed);
+        mainGen.fullyConnect(0, 0, lin, tanh, allConn, xavierUniformInit, seed);
 
         Neat::genomeToNetwork(mainGen, mainNetwork);
 
@@ -1034,9 +1001,6 @@ void MainWindow::on_pushButton_newPmc_clicked()
     {
         newNetType = NewNetwork::PMC;
         ui->label_netPath->setText("New PMC");
-
-        Activation* tanh = new TanhActivation();
-        Activation* lin = new LinearActivation();
 
         std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> allConn;
 
@@ -1056,7 +1020,7 @@ void MainWindow::on_pushButton_newPmc_clicked()
             ui->label_mainResult->setText("Error nodes is not a number");
         }
 
-        mainGen.fullyConnect(layer, nodes, tanh, lin, allConn, heUniformInit, seed);
+        mainGen.fullyConnect(layer, nodes, tanh, tanh, allConn, heUniformInit, seed);
 
         Neat::genomeToNetwork(mainGen, mainNetwork);
 
@@ -1072,9 +1036,6 @@ void MainWindow::on_pushButton_newRbf_clicked()
         newNetType = NewNetwork::RBF;
         ui->label_netPath->setText("New RBF");
 
-        Activation* lin = new LinearActivation();
-        Activation* gauss = new GaussianActivation();
-
         std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> allConn;
 
         bool validNum;
@@ -1093,7 +1054,7 @@ void MainWindow::on_pushButton_newRbf_clicked()
             ui->label_mainResult->setText("Error nodes is not a number");
         }
 
-        mainGen.fullyConnect(layer, nodes, gauss, lin, allConn, xavierUniformInit, seed);
+        mainGen.fullyConnect(layer, nodes, gauss, tanh, allConn, xavierUniformInit, seed);
 
         Neat::genomeToNetwork(mainGen, mainNetwork);
 
@@ -1195,9 +1156,6 @@ void MainWindow::on_pushButton_unitTest_clicked()
 
             QPixmap pixmap(fileName);
             ui->label_image->setPixmap(pixmap);
-            //ui->label_image->setMask(pixmap.mask());
-
-            //ui->label_image->show();
         }
         lockMainTest.unlock();
     }

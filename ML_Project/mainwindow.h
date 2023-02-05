@@ -74,5 +74,10 @@ private:
 
     std::mutex lockBaseTest;
     std::mutex lockMainTest;
+
+    Activation* tanh = new TanhActivation();
+    Activation* sig = new SigmoidActivation();
+    Activation* gauss = new GaussianActivation();
+    Activation* lin = new LinearActivation();
 };
 #endif // MAINWINDOW_H
