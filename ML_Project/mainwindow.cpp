@@ -140,7 +140,7 @@ void MainWindow::on_pushButton_test1_clicked()
     {
         int index = randInt(0, 2);
 
-        network.backprop(input[index], output[index], 0.1, false);
+        network.backprop(input[index], output[index], 0.1, true);
     }
 
     //network.applyBackprop(gen);
@@ -307,7 +307,7 @@ void MainWindow::on_pushButton_test2_clicked()
     {
         int index = randInt(0, 19);
 
-        network.backprop(input[index], output[index], 0.1, false);
+        network.backprop(input[index], output[index], 0.1, true);
     }
     //network.applyBackprop(gen);
 
@@ -473,7 +473,7 @@ void MainWindow::on_pushButton_test3_clicked()
     {
         int index = randInt(0, 3);
 
-        network.backprop(input[index], output[index], 0.1, false);
+        network.backprop(input[index], output[index], 0.1, true);
     }
     //network.applyBackprop(gen);
 
@@ -633,7 +633,7 @@ void MainWindow::on_pushButton_test4_clicked()
     {
         int index = randInt(0, 999);
 
-        network.backprop(input[index], output[index], 0.05 * sig->activate(0.5f - (i/10000000.f)*4), false);
+        network.backprop(input[index], output[index], 0.05 * sig->activate(0.5f - (i/10000000.f)*4), true);
     }
 
 

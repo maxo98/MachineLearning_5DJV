@@ -12,9 +12,9 @@
 #include "ThreadPool.h"
 
 
-//#define HELP
-//#define ES_HYPER
-#define TROLLOLOL
+#define HELP
+#define ES_HYPER
+//#define TROLLOLOL
 
 #define TAILLE_ECRAN 20
 
@@ -23,7 +23,7 @@ int launchESHypeneatTest()
     NeatParameters neatparam;
 
 #ifndef TROLLOLOL
-    //neatparam.activationFunctions.push_back(new thresholdActivation());
+    neatparam.activationFunctions.push_back(new ThresholdActivation());
     neatparam.activationFunctions.push_back(new AbsActivation());
     neatparam.activationFunctions.push_back(new SinActivation());
     neatparam.activationFunctions.push_back(new HyperbolSecantActivation());
@@ -31,17 +31,17 @@ int launchESHypeneatTest()
     neatparam.activationFunctions.push_back(new LinearActivation());
 #endif // !TROLLOLOL
 
-
+    
 #ifdef TROLLOLOL
     neatparam.activationFunctions.push_back(new SquareActivation());
     neatparam.activationFunctions.push_back(new SquareRootActivation());
 #endif // TROLLOLOL
-
-    neatparam.pbMutateLink = 0.05;// 0.05;
+    
+    neatparam.pbMutateLink = 0.4;// 0.05;
     neatparam.pbMutateNode = 0.03;//0.03;
     neatparam.pbWeight = 0.9;// 0.9;
     neatparam.pbToggleLink = 0.01;// 0.05;
-    neatparam.weightMuteStrength = 0.5;// 2.5;
+    neatparam.weightMuteStrength = 1.5;// 2.5;
     neatparam.pbMutateActivation = 0.7;
 
     neatparam.disjointCoeff = 1.0;
@@ -65,10 +65,10 @@ int launchESHypeneatTest()
     neatparam.pbMutateOnly = 0.25;
     neatparam.pbMateOnly = 0.2;
 
-    neatparam.speciationDistance = 3;
+    neatparam.speciationDistance = 5;
 
 
-    neatparam.speciationDistanceMod = 0.3;
+    neatparam.speciationDistanceMod = 0.5;
     neatparam.minExpectedSpecies = 15;
     neatparam.maxExpectedSpecies = 40;
     neatparam.adaptSpeciation = false;
@@ -80,21 +80,23 @@ int launchESHypeneatTest()
     HyperneatParameters hyperneatParam;
 
     hyperneatParam.activationFunction = new LinearActivation();
-    hyperneatParam.cppnInput = 4;
+    
 
 #ifdef HELP
+    hyperneatParam.cppnInput = 5;
     hyperneatParam.cppnInputFunction = invDistCppnInput;
 #endif // HELP
 
 #ifndef HELP
+    hyperneatParam.cppnInput = 4;
     hyperneatParam.cppnInputFunction = basicCppnInput;
 #endif // !HELP
 
     hyperneatParam.cppnOutput = 1;
     hyperneatParam.nDimensions = 2;
     hyperneatParam.thresholdFunction = noThreshold; 
-    //hyperneatParam.weightModifierFunction = noChangeWeight;
-    hyperneatParam.weightModifierFunction = absWeight;
+    hyperneatParam.weightModifierFunction = noChangeWeight;
+    //hyperneatParam.weightModifierFunction = absWeight;
 
 
     float threshold = 0.5;
@@ -123,86 +125,91 @@ int launchESHypeneatTest()
 
     std::vector<float> pos;
     pos.resize(2);
+#ifndef NEAT
+
 
 #ifndef ES_HYPER
-    Hyperneat esHyper(popSize, neatparam, hyperneatParam);
+    Hyperneat algo(popSize, neatparam, hyperneatParam);
 #endif // !ES_HYPER
 
 #ifdef ES_HYPER
-    ES_Hyperneat esHyper(popSize, neatparam, hyperneatParam, esParam);
+    ES_Hyperneat algo(popSize, neatparam, hyperneatParam, esParam);
 #endif // ES_HYPER
 
 
     pos[0] = 0;
     pos[1] = -0.5;
-    esHyper.addInput(pos);
+    algo.addInput(pos);
 
     pos[0] = 0;
     pos[1] = 0.5;
-    esHyper.addInput(pos);
+    algo.addInput(pos);
 
     pos[0] = -0.5;
     pos[1] = 0;
-    esHyper.addInput(pos);
+    algo.addInput(pos);
 
     pos[0] = 0.5;
     pos[1] = 0;
-    esHyper.addInput(pos);
+    algo.addInput(pos);
 
 
 
     pos[0] = 0;
-    pos[1] = -0.5;
-    esHyper.addInput(pos);
+    pos[1] = -0.7;
+    algo.addInput(pos);
 
     pos[0] = 0;
-    pos[1] = 0.5;
-    esHyper.addInput(pos);
+    pos[1] = 0.7;
+    algo.addInput(pos);
 
-    pos[0] = -0.5;
+    pos[0] = -0.7;
     pos[1] = 0;
-    esHyper.addInput(pos);
+    algo.addInput(pos);
 
-    pos[0] = 0.5;
+    pos[0] = 0.7;
     pos[1] = 0;
-    esHyper.addInput(pos);
+    algo.addInput(pos);
 
     //Set network output, up, down, left, right
 
     pos[0] = 0;
-    pos[1] = -0.5;
-    esHyper.addOutput(pos);
+    pos[1] = -1.0;
+    algo.addOutput(pos);
 
     pos[0] = 0;
-    pos[1] = 0.5;
-    esHyper.addOutput(pos);
+    pos[1] = 1.0;
+    algo.addOutput(pos);
 
-    pos[0] = -0.5;
+    pos[0] = -1.0;
     pos[1] = 0;
-    esHyper.addOutput(pos);
+    algo.addOutput(pos);
 
-    pos[0] = 0.5;
+    pos[0] = 1.0;
     pos[1] = 0;
-    esHyper.addOutput(pos);
+    algo.addOutput(pos);
 
 
-    esHyper.initNetworks();
-    esHyper.generateNetworks();
+    algo.initNetworks();
+    algo.generateNetworks();
+#else
+    Neat algo(popSize, 8, 4, neatparam, Neat::INIT::FULL);
 
-    esHypeneatTest(popSize, esHyper);
+#endif // !NEAT
+    esHypeneatTest(popSize, algo);
 
-    esHyper.saveHistory();
+    algo.saveHistory();
 
     std::vector<float> output;
 
     NeuralNetwork network;
-    esHyper.genomeToNetwork(*esHyper.getGoat(), network);
+    algo.genomeToNetwork(*algo.getGoat(), network);
 
     bool aaa;
 
     snakeTest(&network, true, aaa);
 
-    esHyper.getGoat()->saveCurrentGenome();
+    algo.getGoat()->saveCurrentGenome();
 
     for (int i = 0; i < neatparam.activationFunctions.size(); i++)
     {
@@ -214,8 +221,11 @@ int launchESHypeneatTest()
     return 0;
 }
 
-
-bool esHypeneatTest(int popSize, Hyperneat& esHyper)
+#ifndef NEAT
+bool esHypeneatTest(int popSize, Hyperneat& algo)
+#else
+bool esHypeneatTest(int popSize, Neat& algo)
+#endif
 {
     std::vector<float> fitness;
 
@@ -223,7 +233,7 @@ bool esHypeneatTest(int popSize, Hyperneat& esHyper)
 
     bool validated = false;
 
-    for (int i3 = 0; i3 < 100 && validated == false; i3++)
+    for (int i3 = 0; i3 < 200 && validated == false; i3++)
     {
         std::cout << std::endl << "gen " << i3 << std::endl;
 
@@ -234,22 +244,33 @@ bool esHypeneatTest(int popSize, Hyperneat& esHyper)
 
         int threads = 1;
         ThreadPool* pool = ThreadPool::getInstance();
-        unsigned int cpus = std::thread::hardware_concurrency();
+        size_t taskLaunched = pool->getTasksTotal();
+        unsigned int cpus = (pool->getThreadPoolSize() >= taskLaunched ? pool->getThreadPoolSize() - taskLaunched : 0);
 
         float totalWorkload = popSize;
-        float workload = totalWorkload / cpus;
+        float workload = (cpus > 1 ? totalWorkload / cpus : totalWorkload);
         float restWorkload = 0;
         int currentWorkload = totalWorkload;
         int startIndex = 0;
         int count = 0;
 
+        if (totalWorkload == 1)
+        {
+            cpus = 1;
+        }
+
         std::deque<std::atomic<bool>> tickets;
 
 #ifdef MULTITHREAD
-        while (workload < 1)
+        while (workload < 1 && cpus > 2)
         {
             cpus--;
             workload = totalWorkload / cpus;
+        }
+
+        if (workload < 1.f)
+        {
+            cpus = 0;
         }
 
         while (cpus > threads)
@@ -259,7 +280,7 @@ bool esHypeneatTest(int popSize, Hyperneat& esHyper)
             restWorkload = workloadFrac;
 
             tickets.emplace_back(false);
-            pool->queueJob(snakeEvaluate, startIndex, currentWorkload + floor(restWorkload), std::ref(fitness), std::ref(esHyper), std::ref(validated), &tickets.back());
+            pool->queueJob(snakeEvaluate, startIndex, currentWorkload + floor(restWorkload), std::ref(fitness), std::ref(algo), std::ref(validated), &tickets.back());
             ++threads;
 
             count += currentWorkload + floor(restWorkload);
@@ -269,32 +290,19 @@ bool esHypeneatTest(int popSize, Hyperneat& esHyper)
             restWorkload -= floor(restWorkload);
             restWorkload += workloadFrac;
         }
-
-        while (restWorkload > 0)
-        {
-            restWorkload--;
-            currentWorkload++;
-        }
 #endif //MULTITHREAD
+        currentWorkload = totalWorkload - count;
 
-        count += currentWorkload;
-
-        while (count > totalWorkload)
-        {
-            currentWorkload--;
-            count--;
-        }
-
-        snakeEvaluate(startIndex, currentWorkload, fitness, esHyper, validated);
+        snakeEvaluate(startIndex, currentWorkload, fitness, algo, validated);
 
         for (std::deque<std::atomic<bool>>::iterator itTicket = tickets.begin(); itTicket != tickets.end(); ++itTicket)
         {
             itTicket->wait(false);
         }
 
-        esHyper.setScore(fitness);
+        algo.setScore(fitness);
 
-        esHyper.evolve();
+        algo.evolve();
     }
 
     std::cout << "done" << std::endl;
@@ -302,13 +310,17 @@ bool esHypeneatTest(int popSize, Hyperneat& esHyper)
     return false;
 }
 
-void snakeEvaluate(int startIndex, int currentWorkload, std::vector<float>& fitness, Hyperneat& esHyper, bool& validated, std::atomic<bool>* ticket)
+#ifndef NEAT
+void snakeEvaluate(int startIndex, int currentWorkload, std::vector<float>& fitness, Hyperneat& algo, bool& validated, std::atomic<bool>* ticket)
+#else
+void snakeEvaluate(int startIndex, int currentWorkload, std::vector<float>& fitness, Neat& algo, bool& validated, std::atomic<bool>* ticket)
+#endif // !NEAT
 {
     for (int i = startIndex; i < (startIndex + currentWorkload); i++)
     {
         bool tmp = false;
 
-        fitness[i] = snakeTest(esHyper.getNeuralNetwork(i), false, tmp);
+        fitness[i] = snakeTest(algo.getNeuralNetwork(i), false, tmp);
 
         if (tmp == true)
         {
@@ -330,8 +342,6 @@ int snakeTest(NeuralNetwork* network, bool display, bool& validated)
     int wins = 0;
 
     scoreArray.resize(20, 0);
-
-    float fruitScore = sqrt(pow(TAILLE_ECRAN, 2) * 2);
 
     for(int test = 0; (test < 20 && display == false) || (test < 1 && display == true); test++)
     {
@@ -389,10 +399,10 @@ int snakeTest(NeuralNetwork* network, bool display, bool& validated)
                 std::cout << snake.back() << " " << fruit << std::endl;
             }
 
-            networkInput[0] = (pow(TAILLE_ECRAN, 2) * 2)  - (pow(snake.back().first - fruit.first - 0.5, 2) + pow(snake.back().second - fruit.second, 2));
-            networkInput[1] = (pow(TAILLE_ECRAN, 2) * 2) - (pow(snake.back().first - fruit.first + 0.5, 2) + pow(snake.back().second - fruit.second, 2));
-            networkInput[2] = (pow(TAILLE_ECRAN, 2) * 2) - (pow(snake.back().first - fruit.first, 2) + pow(snake.back().second - fruit.second - 0.5, 2));
-            networkInput[3] = (pow(TAILLE_ECRAN, 2) * 2) - (pow(snake.back().first - fruit.first, 2) + pow(snake.back().second - fruit.second + 0.5, 2));
+            networkInput[0] = (sqrt(pow(TAILLE_ECRAN, 2) * 2)  - sqrt(pow(snake.back().first - fruit.first - 0.5, 2) + pow(snake.back().second - fruit.second, 2))) / (TAILLE_ECRAN*2);
+            networkInput[1] = (sqrt(pow(TAILLE_ECRAN, 2) * 2) - sqrt(pow(snake.back().first - fruit.first + 0.5, 2) + pow(snake.back().second - fruit.second, 2))) / (TAILLE_ECRAN * 2);
+            networkInput[2] = (sqrt(pow(TAILLE_ECRAN, 2) * 2) - sqrt(pow(snake.back().first - fruit.first, 2) + pow(snake.back().second - fruit.second - 0.5, 2))) / (TAILLE_ECRAN * 2);
+            networkInput[3] = (sqrt(pow(TAILLE_ECRAN, 2) * 2) - sqrt(pow(snake.back().first - fruit.first, 2) + pow(snake.back().second - fruit.second + 0.5, 2))) / (TAILLE_ECRAN*2);
 
             for (int n = 0; n < 4; n++)
             {
@@ -420,19 +430,19 @@ int snakeTest(NeuralNetwork* network, bool display, bool& validated)
                             && (pos.first != 0 || pos.second != 0)))
                     {
                         
-                        float dist = -((pow(TAILLE_ECRAN, 2) * 2) - (pow(float(pos.first) - 0.5f, 2) + pow(pos.second, 2)));
+                        float dist = -sqrt((pow(TAILLE_ECRAN, 2) * 2) - (pow(float(pos.first) - 0.5f, 2) + pow(pos.second, 2))) / (TAILLE_ECRAN * 2);
 
                         if (dist < networkInput[4]) networkInput[4] = dist;
 
-                        dist = -((pow(TAILLE_ECRAN, 2) * 2) - (pow(float(pos.first) + 0.5f, 2) + pow(pos.second, 2)));
+                        dist = -sqrt((pow(TAILLE_ECRAN, 2) * 2) - (pow(float(pos.first) + 0.5f, 2) + pow(pos.second, 2))) / (TAILLE_ECRAN * 2);
 
                         if (dist < networkInput[5]) networkInput[5] = dist;
 
-                        dist = -((pow(TAILLE_ECRAN, 2) * 2) - (pow(pos.first, 2) + pow(float(pos.second) - 0.5f, 2)));
+                        dist = -sqrt((pow(TAILLE_ECRAN, 2) * 2) - (pow(pos.first, 2) + pow(float(pos.second) - 0.5f, 2))) / (TAILLE_ECRAN * 2);
 
                         if (dist < networkInput[6]) networkInput[6] = dist;
 
-                        dist = -((pow(TAILLE_ECRAN, 2) * 2) - (pow(pos.first, 2) + pow(float(pos.second) + 0.5f, 2)));
+                        dist = -sqrt((pow(TAILLE_ECRAN, 2) * 2) - (pow(pos.first, 2) + pow(float(pos.second) + 0.5f, 2))) / (TAILLE_ECRAN * 2);
 
                         if (dist < networkInput[7]) networkInput[7] = dist;
                     }

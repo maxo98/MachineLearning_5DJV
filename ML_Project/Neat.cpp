@@ -39,7 +39,7 @@ Neat::Neat(unsigned int _populationSize, unsigned int _input, unsigned int _outp
 
 	for (int i = 0; i < initPop.size(); i++)
 	{
-        for (std::map<unsigned int, GeneConnection>::iterator it = initPop[i].getConnections()->begin(); it != initPop[i].getConnections()->end(); ++it)
+		for (std::map<unsigned int, GeneConnection>::iterator it = initPop[i].getConnections()->begin(); it != initPop[i].getConnections()->end(); ++it)
 		{
 			allConnections.emplace(std::pair<int, int>(it->second.getNodeA(), it->second.getNodeB()), it->first);
 		}
@@ -214,13 +214,13 @@ void Neat::genomeToNetwork(Genome& genome, NeuralNetwork& network)
 {
 	network.clear();
 
-    std::vector<GeneNode>* nodes = genome.getNodes();
-    std::vector<std::pair<unsigned int, unsigned int>> nodePosition;//Stores postion of the nodes in the network
-    //nodePosition.reserve(nodes->size());
+	std::vector<GeneNode>* nodes = genome.getNodes();
+	std::vector<std::pair<unsigned int, unsigned int>> nodePosition;//Stores postion of the nodes in the network
+	nodePosition.reserve(nodes->size());
 
 	//Add the nodes to the layer
 	int i = 0;
-    for (std::vector<GeneNode>::iterator node = nodes->begin(); node != nodes->end(); ++node, ++i)
+	for (std::vector<GeneNode>::iterator node = nodes->begin(); node != nodes->end(); ++node, ++i)
 	{
 		unsigned int layer = node->getLayer();
 
@@ -547,26 +547,37 @@ void Neat::evolve()
 	//Perform reproduction.  Reproduction is done on a per-Species
 	//basis.  (So this could be paralellized potentially.)
 	int newBornIndex = 0;
-	int threads = 1;
-	ThreadPool* pool = ThreadPool::getInstance();
-	unsigned int cpus = std::thread::hardware_concurrency();
 	std::mutex lock;
-
 	std::list<Species*>::iterator itSortedSpecies = sortedSpecies.begin();
 
+	int threads = 1;
+	ThreadPool* pool = ThreadPool::getInstance();
+	size_t taskLaunched = pool->getTasksTotal();
+	unsigned int cpus = (pool->getThreadPoolSize() > taskLaunched ? pool->getThreadPoolSize() - taskLaunched : 0);
+
 	float totalWorkload = sortedSpecies.size();
-	float workload = totalWorkload / cpus;
+	float workload = (cpus > 1 ? totalWorkload / cpus : totalWorkload);
+	float restWorkload = 0;
 	int currentWorkload = totalWorkload;
 	int count = 0;
-	float restWorkload = 0;
+
+	if (totalWorkload == 1)
+	{
+		cpus = 1;
+	}
 
 	std::deque<std::atomic<bool>> tickets;
-	
+
 #ifdef MULTITHREAD
-	while (workload < 1)
+	while (workload < 1 && cpus > 2)
 	{
 		cpus--;
 		workload = totalWorkload / cpus;
+	}
+
+	if (workload < 1.f)
+	{
+		cpus = 0;
 	}
 
 	while (cpus > threads)
@@ -980,8 +991,8 @@ float Neat::distance(Genome& genomeA, Genome& genomeB)
 		genome2 = &genomeB;
 	}
 
-    std::map<unsigned int, GeneConnection>::const_iterator it1 = genome1->getConnections()->cbegin();
-    std::map<unsigned int, GeneConnection>::const_iterator it2 = genome2->getConnections()->cbegin();
+	std::map<unsigned int, GeneConnection>::const_iterator it1 = genome1->getConnections()->cbegin();
+	std::map<unsigned int, GeneConnection>::const_iterator it2 = genome2->getConnections()->cbegin();
 	int count = 0;
 
 	float disjoint = 0;
