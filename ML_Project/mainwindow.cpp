@@ -90,7 +90,7 @@ void MainWindow::on_pushButton_test1_clicked()
         std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> allConn;
 
         std::vector<Activation*> arrActiv;
-        arrActiv.push_back(lin);
+        arrActiv.push_back(tanh);
         Genome gen(3, 1, arrActiv);
 
         float normalizedXavier = 1/sqrt(3.f);
@@ -258,7 +258,7 @@ void MainWindow::on_pushButton_test2_clicked()
         std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> allConn;
 
         std::vector<Activation*> arrActiv;
-        arrActiv.push_back(lin);
+        arrActiv.push_back(tanh);
 
         Genome gen(3, 1, arrActiv);
 
