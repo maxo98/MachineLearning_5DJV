@@ -563,7 +563,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>Load HyperNEAT</string>
+       <string>Load ES-HyperNEAT</string>
       </property>
      </widget>
     </widget>
