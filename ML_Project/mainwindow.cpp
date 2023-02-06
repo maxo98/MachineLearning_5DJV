@@ -22,7 +22,12 @@ MainWindow::MainWindow(QWidget *parent)
 
     std::vector<Activation*> arrActiv;
     arrActiv.push_back(lin);
+
+#ifndef GREY
     mainGen = Genome(380*380*3+1, 3, arrActiv);
+#else
+    mainGen = Genome(380*380+1, 3, arrActiv);
+#endif
 
     ThreadPool* pool = ThreadPool::getInstance();
     pool->start();
@@ -920,7 +925,12 @@ void MainWindow::loadData(std::deque<std::vector<float>>& input, std::deque<std:
         {
             QImage image(fileinfo.absoluteFilePath());
 
+#ifndef GREY
             itInput->resize(380*380*3+1);
+#else
+            itInput->resize(380*380+1);
+#endif
+
 
             for(int x = 0; x < 308; x++)
             {
@@ -928,13 +938,22 @@ void MainWindow::loadData(std::deque<std::vector<float>>& input, std::deque<std:
                 {
                     QColor color = image.pixelColor(x, y);
 
+        #ifndef GREY
                     (*itInput)[x * 380 * 3 + y * 3] = color.redF();
                     (*itInput)[x * 380 * 3 + y * 3] = color.greenF();
                     (*itInput)[x * 380 * 3 + y * 3] = color.blueF();
+        #else
+                    (*itInput)[x * 380 + y] = color.blackF();
+        #endif
                 }
             }
 
+#ifndef GREY
             (*itInput)[380*380*3] = 0.5f;//Bias
+#else
+            (*itInput)[380*380] = 0.5f;//Bias
+#endif
+
 
             itOutput->resize(3);
 
@@ -1118,7 +1137,11 @@ void MainWindow::on_pushButton_unitTest_clicked()
                 return;
             }
 
+#ifndef GREY
             input.resize(380*380*3+1);
+#else
+           input.resize(380*380+1);
+#endif
 
             for(int x = 0; x < 308; x++)
             {
@@ -1126,13 +1149,22 @@ void MainWindow::on_pushButton_unitTest_clicked()
                 {
                     QColor color = image.pixelColor(x, y);
 
+#ifndef GREY
                     input[x * 380 * 3 + y * 3] = color.redF();
                     input[x * 380 * 3 + y * 3] = color.greenF();
                     input[x * 380 * 3 + y * 3] = color.blueF();
+#else
+                    input[x * 380 + y] = color.blackF();
+#endif
+
                 }
             }
 
-            input[380*380*3] = 0.5f;//Bias
+#ifndef GREY
+                    input[380*380*3] = 0.5f;//Bias
+#else
+                    input[380*380] = 0.5f;//Bias
+#endif
 
             mainNetwork.compute(input, output);
 
