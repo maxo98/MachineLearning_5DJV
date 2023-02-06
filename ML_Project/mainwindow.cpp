@@ -900,9 +900,10 @@ void MainWindow::train()
 
             hyper->evolve();
         }
+
+        hyper->genomeToNetwork(*hyper->getGoat(), mainNetwork);
     }
 
-    hyper->genomeToNetwork(*hyper->getGoat(), mainNetwork);
     test();
     lockMainTest.unlock();
 }
@@ -992,6 +993,8 @@ float MainWindow::test()
 
     loadData(input, output, dataFolder, false);
 
+    qDebug() << "a";
+
     float score = 0;
 
     for(int i = 0; i < input.size(); i++)
@@ -1023,6 +1026,8 @@ float MainWindow::test()
             }
         }
     }
+
+    qDebug() << "b";
 
     score = score / output.size() * 100;
 
