@@ -62,6 +62,10 @@ public:
     QLineEdit *lineEdit_lRate;
     QLabel *label_progress;
     QPushButton *pushButton_unitTest;
+    QPushButton *pushButton_hyperneat;
+    QPushButton *pushButton_esHyperneat;
+    QPushButton *pushButton_pickHyperneat;
+    QPushButton *pushButton_pickEsHyperneat;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -69,12 +73,12 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName("MainWindow");
-        MainWindow->resize(828, 922);
+        MainWindow->resize(936, 922);
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName("centralwidget");
         tabWidget = new QTabWidget(centralwidget);
         tabWidget->setObjectName("tabWidget");
-        tabWidget->setGeometry(QRect(20, 0, 781, 871));
+        tabWidget->setGeometry(QRect(20, 0, 901, 871));
         tab = new QWidget();
         tab->setObjectName("tab");
         pushButton_test4 = new QPushButton(tab);
@@ -192,12 +196,24 @@ public:
         label_progress->setFont(font);
         pushButton_unitTest = new QPushButton(tab_2);
         pushButton_unitTest->setObjectName("pushButton_unitTest");
-        pushButton_unitTest->setGeometry(QRect(580, 140, 141, 51));
+        pushButton_unitTest->setGeometry(QRect(580, 80, 141, 51));
+        pushButton_hyperneat = new QPushButton(tab_2);
+        pushButton_hyperneat->setObjectName("pushButton_hyperneat");
+        pushButton_hyperneat->setGeometry(QRect(580, 140, 141, 51));
+        pushButton_esHyperneat = new QPushButton(tab_2);
+        pushButton_esHyperneat->setObjectName("pushButton_esHyperneat");
+        pushButton_esHyperneat->setGeometry(QRect(730, 140, 141, 51));
+        pushButton_pickHyperneat = new QPushButton(tab_2);
+        pushButton_pickHyperneat->setObjectName("pushButton_pickHyperneat");
+        pushButton_pickHyperneat->setGeometry(QRect(730, 80, 141, 21));
+        pushButton_pickEsHyperneat = new QPushButton(tab_2);
+        pushButton_pickEsHyperneat->setObjectName("pushButton_pickEsHyperneat");
+        pushButton_pickEsHyperneat->setGeometry(QRect(730, 110, 141, 21));
         tabWidget->addTab(tab_2, QString());
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName("menubar");
-        menubar->setGeometry(QRect(0, 0, 828, 20));
+        menubar->setGeometry(QRect(0, 0, 936, 20));
         MainWindow->setMenuBar(menubar);
         statusbar = new QStatusBar(MainWindow);
         statusbar->setObjectName("statusbar");
@@ -248,6 +264,10 @@ public:
         lineEdit_lRate->setText(QCoreApplication::translate("MainWindow", "0.01", nullptr));
         label_progress->setText(QCoreApplication::translate("MainWindow", "Progress:", nullptr));
         pushButton_unitTest->setText(QCoreApplication::translate("MainWindow", "Single Test", nullptr));
+        pushButton_hyperneat->setText(QCoreApplication::translate("MainWindow", "HyperNEAT", nullptr));
+        pushButton_esHyperneat->setText(QCoreApplication::translate("MainWindow", "ES-HyperNEAT", nullptr));
+        pushButton_pickHyperneat->setText(QCoreApplication::translate("MainWindow", "Load HyperNEAT", nullptr));
+        pushButton_pickEsHyperneat->setText(QCoreApplication::translate("MainWindow", "Load HyperNEAT", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_2), QCoreApplication::translate("MainWindow", "Main subject", nullptr));
     } // retranslateUi
 

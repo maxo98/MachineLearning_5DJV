@@ -3,6 +3,7 @@
 
 #include "Hyperneat.h"
 #include "ThreadPool.h"
+#include <QDebug>
 
 Hyperneat::Hyperneat(unsigned int _populationSize, const NeatParameters& _neatParam, const HyperneatParameters& _hyperParam, Neat::INIT init)
 {
@@ -217,7 +218,6 @@ void Hyperneat::connectLayer(unsigned int layer, NeuralNetwork& hypernet, Neural
 		int nodeA = 0;
 		std::vector<float> p2 = std::vector<float>(itNode->begin(), itNode->end());
 		
-
 		//For each node from the previous layer
 		for (prevLayer; prevLayer != endPreviousLayer; ++prevLayer)
 		{

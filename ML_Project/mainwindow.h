@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QPainter>
 #include "NeuralNetwork.h"
+#include "ES_Hyperneat.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -27,6 +28,12 @@ public:
 
     void test4Thread();
     void train();
+    void createHyperNeatClass(bool hyperneat);
+    void createHyperNeat(bool hyperneat);
+    void testHyperThread(int startIndex, int currentWorkload, std::vector<float>& fitness, const std::deque<std::vector<float>>& input,
+                                     const std::deque<std::vector<float>>& output, std::atomic<bool>* ticket = nullptr);
+    float testHyper(NeuralNetwork* network, const std::deque<std::vector<float>>& input,
+                                     const std::deque<std::vector<float>>& output);
 
 private slots:
     void on_pushButton_PMC_clicked();
@@ -61,6 +68,14 @@ private slots:
 
     void on_pushButton_unitTest_clicked();
 
+    void on_pushButton_hyperneat_clicked();
+
+    void on_pushButton_esHyperneat_clicked();
+
+    void on_pushButton_pickHyperneat_clicked();
+
+    void on_pushButton_pickEsHyperneat_clicked();
+
 private:
     Ui::MainWindow *ui;
 
@@ -79,5 +94,12 @@ private:
     Activation* sig = new SigmoidActivation();
     Activation* gauss = new GaussianActivation();
     Activation* lin = new LinearActivation();
+    Activation* sin = new SinActivation();
+    Activation* threshold = new ThresholdActivation();
+    Activation* abs = new AbsActivation();
+
+    Hyperneat* hyper = nullptr;
+    bool useHyper = false;
+    int popSize = 150;
 };
 #endif // MAINWINDOW_H

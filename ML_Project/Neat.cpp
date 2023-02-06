@@ -6,6 +6,7 @@
 #include <chrono>
 #include <random>
 #include "ThreadPool.h"
+#include <QDebug>
 
 
 Neat::Neat(unsigned int _populationSize, unsigned int _input, unsigned int _output, const NeatParameters& _neatParam, INIT init)

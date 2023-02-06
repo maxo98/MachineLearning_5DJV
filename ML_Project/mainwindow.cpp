@@ -8,6 +8,8 @@
 #include <QFileDialog>
 #include "ThreadPool.h"
 
+#define GREY
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -767,6 +769,8 @@ void MainWindow::train()
 
     loadData(input, output, dataFolder, true);
 
+    ui->label_mainResult->setText("Data loaded");
+
     bool validNum;
     double epoch = double(ui->lineEdit_epoch->text().toInt(&validNum));
 
@@ -777,43 +781,128 @@ void MainWindow::train()
         return;
     }
 
-    float lRate = ui->lineEdit_lRate->text().toFloat(&validNum);
-
-    if(validNum == false)
+    if(useHyper == false)
     {
-        ui->label_mainResult->setText("Error learning rate is not a number");
-        lockMainTest.unlock();
-        return;
-    }
+        float lRate = ui->lineEdit_lRate->text().toFloat(&validNum);
 
-    qDebug() << input.size() << " " << input[0].size();
-    qDebug() << output.size() << " " << output[0].size();
-    qDebug() << epoch;
-
-    unsigned int percent = 0;
-    unsigned int div = epoch/100.f;
-
-    if(div == 0) div = 1;
-
-    ui->label_mainResult->setText("Training");
-
-    ui->label_progress->setText("Progress: " + QString::number(percent) + "%");
-
-    for (int i = 0; i < epoch; i++)
-    {
-        int index = randInt(0, input.size()-1);
-
-        mainNetwork.backprop(input[index], output[index], lRate, true);
-
-        if((i+1) % div == 0)
+        if(validNum == false)
         {
-            percent++;
-            qDebug() << percent;
+            ui->label_mainResult->setText("Error learning rate is not a number");
+            lockMainTest.unlock();
+            return;
+        }
 
-            ui->label_progress->setText("Progress: " + QString::number(percent) + "%");
+        qDebug() << input.size() << " " << input[0].size();
+        qDebug() << output.size() << " " << output[0].size();
+        qDebug() << epoch;
+
+        unsigned int percent = 0;
+        unsigned int div = epoch/100.f;
+
+        if(div == 0) div = 1;
+
+        ui->label_mainResult->setText("Training");
+
+        ui->label_progress->setText("Progress: " + QString::number(percent) + "%");
+
+        for (int i = 0; i < epoch; i++)
+        {
+            int index = randInt(0, input.size()-1);
+
+            mainNetwork.backprop(input[index], output[index], lRate, true);
+
+            if((i+1) % div == 0)
+            {
+                percent++;
+                qDebug() << percent;
+
+                ui->label_progress->setText("Progress: " + QString::number(percent) + "%");
+            }
+        }
+
+    }else{
+        qDebug() << "hyperneat";
+
+        std::vector<float> fitness;
+
+        fitness.resize(popSize);
+
+        for (int i3 = 0; i3 < epoch; i3++)
+        {
+            qDebug() << "gen" << i3;
+            ui->label_progress->setText("Generation: " + QString::number(i3+1));
+
+            for (int i = 0; i < popSize; i++)
+            {
+                fitness[i] = 0;
+            }
+
+            int threads = 1;
+            ThreadPool* pool = ThreadPool::getInstance();
+            size_t taskLaunched = pool->getTasksTotal();
+            unsigned int cpus = (pool->getThreadPoolSize() >= taskLaunched ? pool->getThreadPoolSize() - taskLaunched : 0);
+
+            float totalWorkload = popSize;
+            float workload = (cpus > 1 ? totalWorkload / cpus : totalWorkload);
+            float restWorkload = 0;
+            int currentWorkload = totalWorkload;
+            int startIndex = 0;
+            int count = 0;
+
+            if (totalWorkload == 1)
+            {
+                cpus = 1;
+            }
+
+            std::deque<std::atomic<bool>> tickets;
+
+    #ifdef MULTITHREAD
+            while (workload < 1 && cpus > 2)
+            {
+                cpus--;
+                workload = totalWorkload / cpus;
+            }
+
+            if (workload < 1.f)
+            {
+                cpus = 0;
+            }
+
+            while (cpus > threads)
+            {
+                currentWorkload = floor(workload);
+                float workloadFrac = fmod(workload, 1.0f);
+                restWorkload = workloadFrac;
+
+                tickets.emplace_back(false);
+                pool->queueJob(&MainWindow::testHyperThread, this, startIndex, currentWorkload + floor(restWorkload), fitness, std::ref(input), std::ref(output), &tickets.back());
+                ++threads;
+
+                count += currentWorkload + floor(restWorkload);
+
+                startIndex += currentWorkload + floor(restWorkload);
+
+                restWorkload -= floor(restWorkload);
+                restWorkload += workloadFrac;
+            }
+    #endif //MULTITHREAD
+
+            currentWorkload = totalWorkload - count;
+
+            testHyperThread(startIndex, currentWorkload, fitness, input, output);
+
+            for (std::deque<std::atomic<bool>>::iterator itTicket = tickets.begin(); itTicket != tickets.end(); ++itTicket)
+            {
+                itTicket->wait(false);
+            }
+
+            hyper->setScore(fitness);
+
+            hyper->evolve();
         }
     }
 
+    hyper->genomeToNetwork(*hyper->getGoat(), mainNetwork);
     test();
     lockMainTest.unlock();
 }
@@ -824,6 +913,66 @@ void MainWindow::on_pushButton_test_clicked()
     lockMainTest.lock();
     test();
     lockMainTest.unlock();
+}
+
+void MainWindow::testHyperThread(int startIndex, int currentWorkload, std::vector<float>& fitness, const std::deque<std::vector<float>>& input,
+                                 const std::deque<std::vector<float>>& output, std::atomic<bool>* ticket)
+{
+    for (int i = startIndex; i < (startIndex + currentWorkload); i++)
+    {
+        fitness[i] = testHyper(hyper->getNeuralNetwork(i), input, output);
+    }
+
+    if (ticket != nullptr)
+    {
+        (*ticket) = true;
+        ticket->notify_one();
+    }
+}
+
+float MainWindow::testHyper(NeuralNetwork* network, const std::deque<std::vector<float>>& input,
+                                 const std::deque<std::vector<float>>& output)
+{
+    float score = 0;
+    std::vector<float> test;
+
+    //NeuralNetwork net;
+
+    //hyper->genomeToNetwork(*hyper->getGoat(), net);
+
+    for(int i = 0; i < 25; i++)
+    {
+        int index = randInt(0, input.size()-1);
+
+        network->compute(input[index], test);
+
+        int maxIndex = 0;
+
+        //qDebug() << test[0];
+
+        for(int cpt = 1; cpt < 3; cpt++)
+        {
+            //qDebug() << test[cpt];
+
+            if(test[maxIndex] < test[cpt])
+            {
+                maxIndex = cpt;
+            }
+        }
+
+        for(int cpt = 0; cpt < 3; cpt++)
+        {
+            if(output[index][cpt] == 1)
+            {
+                if(maxIndex == cpt)
+                {
+                    score++;
+                }
+            }
+        }
+    }
+
+    return score/2;
 }
 
 float MainWindow::test()
@@ -992,6 +1141,8 @@ void MainWindow::on_pushButton_pick_clicked()
 
         ui->label_netPath->setText(fileName);
 
+        useHyper = false;
+
         lockMainTest.unlock();
     }
 }
@@ -1009,6 +1160,8 @@ void MainWindow::on_pushButton_newLinear_clicked()
         mainGen.fullyConnect(0, 0, lin, tanh, allConn, xavierUniformInit, seed);
 
         Neat::genomeToNetwork(mainGen, mainNetwork);
+
+        useHyper = false;
 
         lockMainTest.unlock();
     }
@@ -1042,6 +1195,8 @@ void MainWindow::on_pushButton_newPmc_clicked()
         mainGen.fullyConnect(layer, nodes, tanh, tanh, allConn, heUniformInit, seed);
 
         Neat::genomeToNetwork(mainGen, mainNetwork);
+
+        useHyper = false;
 
         lockMainTest.unlock();
     }
@@ -1077,6 +1232,8 @@ void MainWindow::on_pushButton_newRbf_clicked()
 
         Neat::genomeToNetwork(mainGen, mainNetwork);
 
+        useHyper = false;
+
         lockMainTest.unlock();
     }
 }
@@ -1105,10 +1262,16 @@ void MainWindow::on_pushButton_save_clicked()
 {
     if(lockMainTest.try_lock() == true)
     {
-        mainNetwork.applyBackprop(mainGen);
-        mainGen.saveCurrentGenome(ui->lineEdit_fileName->text().toStdString());
+        if(useHyper == false)
+        {
+            mainNetwork.applyBackprop(mainGen);
+            mainGen.saveCurrentGenome(ui->lineEdit_fileName->text().toStdString());
 
-        ui->label_mainResult->setText("Network saved");
+            ui->label_mainResult->setText("Network saved");
+        }else{
+            hyper->getGoat()->saveCurrentGenome(ui->lineEdit_fileName->text().toStdString());
+            ui->label_mainResult->setText("Network saved");
+        }
 
         lockMainTest.unlock();
     }
@@ -1140,7 +1303,8 @@ void MainWindow::on_pushButton_unitTest_clicked()
 #ifndef GREY
             input.resize(380*380*3+1);
 #else
-           input.resize(380*380+1);
+            input.resize(380*380+1);
+
 #endif
 
             for(int x = 0; x < 308; x++)
@@ -1163,7 +1327,7 @@ void MainWindow::on_pushButton_unitTest_clicked()
 #ifndef GREY
                     input[380*380*3] = 0.5f;//Bias
 #else
-                    input[380*380] = 0.5f;//Bias
+           input[380*380] = 0.5f;//Bias
 #endif
 
             mainNetwork.compute(input, output);
@@ -1189,6 +1353,236 @@ void MainWindow::on_pushButton_unitTest_clicked()
             QPixmap pixmap(fileName);
             ui->label_image->setPixmap(pixmap);
         }
+        lockMainTest.unlock();
+    }
+}
+
+
+void MainWindow::on_pushButton_hyperneat_clicked()
+{
+    if(lockMainTest.try_lock() == true)
+    {
+        ui->label_netPath->setText("New HyperNEAT");
+        createHyperNeat(true);
+
+        lockMainTest.unlock();
+    }
+}
+
+void MainWindow::createHyperNeatClass(bool hyperneat)
+{
+    NeatParameters neatparam;
+
+    neatparam.activationFunctions.push_back(threshold);
+    neatparam.activationFunctions.push_back(abs);
+    neatparam.activationFunctions.push_back(sin);
+    neatparam.activationFunctions.push_back(gauss);
+    neatparam.activationFunctions.push_back(tanh);
+    neatparam.activationFunctions.push_back(lin);
+
+
+    neatparam.pbMutateLink = 0.05;// 0.05;
+    neatparam.pbMutateNode = 0.03;//0.03;
+    neatparam.pbWeight = 0.9;// 0.9;
+    neatparam.pbToggleLink = 0.01;// 0.05;
+    neatparam.weightMuteStrength = 1.5;// 2.5;
+    neatparam.pbMutateActivation = 0.7;
+
+    neatparam.disjointCoeff = 1.0;
+    neatparam.excessCoeff = 1.0;
+    neatparam.mutDiffCoeff = 0.4;
+    neatparam.activationDiffCoeff = 1.0;
+    neatparam.weightCoeff = 0;
+
+    neatparam.killRate = 0.2;
+
+    neatparam.champFileSave = "champ";
+    neatparam.avgFileSave = "avg";//Without extension type file
+    neatparam.saveChampHistory = true;
+    neatparam.saveAvgHistory = true;
+
+    neatparam.pbMateMultipoint = 0.6;
+    neatparam.pbMateSinglepoint = 0.0;
+    neatparam.interspeciesMateRate = 0.001;
+    neatparam.dropOffAge = 15;
+    neatparam.ageSignificance = 1.0;
+    neatparam.pbMutateOnly = 0.25;
+    neatparam.pbMateOnly = 0.2;
+
+    neatparam.speciationDistance = 3;
+
+
+    neatparam.speciationDistanceMod = 0.5;
+    neatparam.minExpectedSpecies = 15;
+    neatparam.maxExpectedSpecies = 40;
+    neatparam.adaptSpeciation = false;
+
+    neatparam.keepChamp = true;
+    neatparam.elistism = true;
+    neatparam.rouletteMultiplier = 2.0;
+
+    HyperneatParameters hyperneatParam;
+
+    hyperneatParam.activationFunction = new LinearActivation();
+
+    hyperneatParam.cppnOutput = 2;
+    hyperneatParam.nDimensions = 2;
+    hyperneatParam.thresholdFunction = leoThreshold;
+    hyperneatParam.weightModifierFunction = noChangeWeight;
+
+    hyperneatParam.cppnInput = 4;
+    hyperneatParam.cppnInputFunction = basicCppnInput;
+
+    float threshold = 0.5;
+
+    float maxDist = 4;
+
+    hyperneatParam.inputVariables.push_back(&maxDist);
+    hyperneatParam.thresholdVariables.push_back(&threshold);
+    hyperneatParam.weightVariables.push_back(&threshold);
+
+    if(hyper != nullptr)
+    {
+        delete hyper;
+    }
+
+
+    if(hyperneat == true)
+    {
+        hyper = new Hyperneat(popSize, neatparam, hyperneatParam);
+    }else{
+
+        ES_Parameters esParam;
+
+        esParam.width = 1;
+
+        esParam.initialDepth = 1;
+        esParam.maxDepth = 3;
+        esParam.bandThreshold = 0.3;
+        esParam.iterationLevel = 1;
+        esParam.varianceThreshold = 2;
+        esParam.allowRecurisvity = false;
+
+        esParam.center.push_back(0);
+        esParam.center.push_back(0);
+
+        hyper = new ES_Hyperneat(popSize, neatparam, hyperneatParam, esParam);
+    }
+}
+
+void MainWindow::createHyperNeat(bool hyperneat)
+{
+    useHyper = true;
+
+    createHyperNeatClass(hyperneat);
+
+    std::vector<float> pos;
+    pos.resize(2);
+
+    for(int x = -190; x < 190; x++)
+    {
+        for(int y = -190; y < 190; y++)
+        {
+            pos[0] = x/190.f;
+            pos[1] = y/190.f;
+            hyper->addInput(pos);
+        }
+    }
+
+    //Set network output, up, down, left, right
+
+    pos[0] = 1.0;
+    pos[1] = 0;
+    hyper->addOutput(pos);
+
+    pos[0] = -1.0;
+    pos[1] = 0;
+    hyper->addOutput(pos);
+
+    pos[0] = 0;
+    pos[1] = 1;
+    hyper->addOutput(pos);
+
+    qDebug() << "init network";
+
+    hyper->initNetworks();
+
+    qDebug() << "gen network";
+
+    hyper->generateNetworks();
+}
+
+
+void MainWindow::on_pushButton_esHyperneat_clicked()
+{
+    if(lockMainTest.try_lock() == true)
+    {
+        createHyperNeat(false);
+
+        lockMainTest.unlock();
+    }
+}
+
+
+void MainWindow::on_pushButton_pickHyperneat_clicked()
+{
+    if(lockMainTest.try_lock() == true)
+    {
+        QString fileName = QFileDialog::getOpenFileName(this,
+            tr("Pick network"), "", tr("*"));
+
+        if (fileName.isEmpty())
+        {
+            lockMainTest.unlock();
+            return;
+        }
+
+        std::vector<Activation*> arrActiv;
+        arrActiv.push_back(lin);
+
+        mainGen.loadGenome(fileName.toStdString());
+
+        createHyperNeatClass(true);
+
+        hyper->genomeToNetwork(mainGen, mainNetwork);
+        test();
+
+        ui->label_netPath->setText(fileName);
+
+        useHyper = false;
+
+        lockMainTest.unlock();
+    }
+}
+
+
+void MainWindow::on_pushButton_pickEsHyperneat_clicked()
+{
+    if(lockMainTest.try_lock() == true)
+    {
+        QString fileName = QFileDialog::getOpenFileName(this,
+            tr("Pick network"), "", tr("*"));
+
+        if (fileName.isEmpty())
+        {
+            lockMainTest.unlock();
+            return;
+        }
+
+        std::vector<Activation*> arrActiv;
+        arrActiv.push_back(lin);
+
+        mainGen.loadGenome(fileName.toStdString());
+
+        createHyperNeatClass(false);
+
+        hyper->genomeToNetwork(mainGen, mainNetwork);
+        test();
+
+        ui->label_netPath->setText(fileName);
+
+        useHyper = false;
+
         lockMainTest.unlock();
     }
 }

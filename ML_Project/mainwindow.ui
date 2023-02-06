@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>828</width>
+    <width>936</width>
     <height>922</height>
    </rect>
   </property>
@@ -19,7 +19,7 @@
      <rect>
       <x>20</x>
       <y>0</y>
-      <width>781</width>
+      <width>901</width>
       <height>871</height>
      </rect>
     </property>
@@ -505,13 +505,65 @@
       <property name="geometry">
        <rect>
         <x>580</x>
-        <y>140</y>
+        <y>80</y>
         <width>141</width>
         <height>51</height>
        </rect>
       </property>
       <property name="text">
        <string>Single Test</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_hyperneat">
+      <property name="geometry">
+       <rect>
+        <x>580</x>
+        <y>140</y>
+        <width>141</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>HyperNEAT</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_esHyperneat">
+      <property name="geometry">
+       <rect>
+        <x>730</x>
+        <y>140</y>
+        <width>141</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>ES-HyperNEAT</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_pickHyperneat">
+      <property name="geometry">
+       <rect>
+        <x>730</x>
+        <y>80</y>
+        <width>141</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Load HyperNEAT</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_pickEsHyperneat">
+      <property name="geometry">
+       <rect>
+        <x>730</x>
+        <y>110</y>
+        <width>141</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Load HyperNEAT</string>
       </property>
      </widget>
     </widget>
@@ -522,7 +574,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>828</width>
+     <width>936</width>
      <height>20</height>
     </rect>
    </property>
