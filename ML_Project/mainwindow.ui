@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>936</width>
+    <width>1086</width>
     <height>922</height>
    </rect>
   </property>
@@ -19,7 +19,7 @@
      <rect>
       <x>20</x>
       <y>0</y>
-      <width>901</width>
+      <width>1041</width>
       <height>871</height>
      </rect>
     </property>
@@ -193,7 +193,7 @@
        <rect>
         <x>130</x>
         <y>40</y>
-        <width>551</width>
+        <width>881</width>
         <height>31</height>
        </rect>
       </property>
@@ -546,7 +546,7 @@
         <x>730</x>
         <y>80</y>
         <width>141</width>
-        <height>21</height>
+        <height>51</height>
        </rect>
       </property>
       <property name="text">
@@ -556,14 +556,27 @@
      <widget class="QPushButton" name="pushButton_pickEsHyperneat">
       <property name="geometry">
        <rect>
-        <x>730</x>
-        <y>110</y>
+        <x>880</x>
+        <y>80</y>
         <width>141</width>
-        <height>21</height>
+        <height>51</height>
        </rect>
       </property>
       <property name="text">
        <string>Load ES-HyperNEAT</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_hybridId">
+      <property name="geometry">
+       <rect>
+        <x>880</x>
+        <y>140</y>
+        <width>141</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>HybridID</string>
       </property>
      </widget>
     </widget>
@@ -574,7 +587,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>936</width>
+     <width>1086</width>
      <height>20</height>
     </rect>
    </property>

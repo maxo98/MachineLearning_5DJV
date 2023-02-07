@@ -256,7 +256,7 @@ bool NeuralNetwork::prepareComputation(const std::vector<float>& inputs)
 
     }
     else {
-        std::cerr << "Inputs given smaller than expected\n";
+        std::cerr << "Inputs given smaller than expected received " << inputs.size() << " expected " << inputNodes.size() << "\n";
 
         return false;
     }

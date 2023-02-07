@@ -28,7 +28,7 @@ public:
 
     void test4Thread();
     void train();
-    void createHyperNeatClass(bool hyperneat);
+    void createHyperNeatStructure(bool hyperneat);
     void createHyperNeat(bool hyperneat);
     void testHyperThread(int startIndex, int currentWorkload, std::vector<float>& fitness, const std::deque<std::vector<float>>& input,
                                      const std::deque<std::vector<float>>& output, std::atomic<bool>* ticket = nullptr);
@@ -75,6 +75,8 @@ private slots:
     void on_pushButton_pickHyperneat_clicked();
 
     void on_pushButton_pickEsHyperneat_clicked();
+
+    void on_pushButton_hybridId_clicked();
 
 private:
     Ui::MainWindow *ui;

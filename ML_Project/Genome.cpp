@@ -531,6 +531,9 @@ Genome Genome::loadGenome(const std::string& fileName)
         return loadedGenome;
     }
 
+    loadedGenome.input = 0;
+    loadedGenome.output = 0;
+
     std::string line;
     
     while (getline(file, line))
@@ -556,6 +559,14 @@ Genome Genome::loadGenome(const std::string& fileName)
         else
         {
             loadedGenome.nodes.push_back(loadedGenome.loadGeneNode(stringSplited));
+
+            if(loadedGenome.nodes.back().type == NODE_TYPE::INPUT)
+            {
+                loadedGenome.input++;
+            }else if(loadedGenome.nodes.back().type == NODE_TYPE::OUTPUT)
+            {
+                loadedGenome.output++;
+            }
         }
     }
 

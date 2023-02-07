@@ -1264,12 +1264,12 @@ void MainWindow::on_pushButton_save_clicked()
         {
             mainNetwork.applyBackprop(mainGen);
             mainGen.saveCurrentGenome(ui->lineEdit_fileName->text().toStdString());
-
-            ui->label_mainResult->setText("Network saved");
         }else{
             hyper->getGoat()->saveCurrentGenome(ui->lineEdit_fileName->text().toStdString());
-            ui->label_mainResult->setText("Network saved");
+
         }
+
+        ui->label_mainResult->setText("Network saved");
 
         lockMainTest.unlock();
     }
@@ -1367,7 +1367,7 @@ void MainWindow::on_pushButton_hyperneat_clicked()
     }
 }
 
-void MainWindow::createHyperNeatClass(bool hyperneat)
+void MainWindow::createHyperNeatStructure(bool hyperneat)
 {
     NeatParameters neatparam;
 
@@ -1466,13 +1466,6 @@ void MainWindow::createHyperNeatClass(bool hyperneat)
 
         hyper = new ES_Hyperneat(popSize, neatparam, hyperneatParam, esParam);
     }
-}
-
-void MainWindow::createHyperNeat(bool hyperneat)
-{
-    useHyper = true;
-
-    createHyperNeatClass(hyperneat);
 
     std::vector<float> pos;
     pos.resize(2);
@@ -1500,6 +1493,13 @@ void MainWindow::createHyperNeat(bool hyperneat)
     pos[0] = 0;
     pos[1] = 1;
     hyper->addOutput(pos);
+}
+
+void MainWindow::createHyperNeat(bool hyperneat)
+{
+    useHyper = true;
+
+    createHyperNeatStructure(hyperneat);
 
     qDebug() << "init network";
 
@@ -1535,12 +1535,9 @@ void MainWindow::on_pushButton_pickHyperneat_clicked()
             return;
         }
 
-        std::vector<Activation*> arrActiv;
-        arrActiv.push_back(lin);
+        createHyperNeatStructure(true);
 
-        mainGen.loadGenome(fileName.toStdString());
-
-        createHyperNeatClass(true);
+        mainGen = Genome::loadGenome(fileName.toStdString());
 
         hyper->genomeToNetwork(mainGen, mainNetwork);
         test();
@@ -1567,12 +1564,9 @@ void MainWindow::on_pushButton_pickEsHyperneat_clicked()
             return;
         }
 
-        std::vector<Activation*> arrActiv;
-        arrActiv.push_back(lin);
+        createHyperNeatStructure(true);
 
-        mainGen.loadGenome(fileName.toStdString());
-
-        createHyperNeatClass(false);
+        mainGen = Genome::loadGenome(fileName.toStdString());
 
         hyper->genomeToNetwork(mainGen, mainNetwork);
         test();
