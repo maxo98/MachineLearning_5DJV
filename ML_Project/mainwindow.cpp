@@ -23,7 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     std::vector<Activation*> arrActiv;
-    arrActiv.push_back(lin);
+    arrActiv.push_back(tanh);
 
 #ifndef GREY
     mainGen = Genome(380*380*3+1, 3, arrActiv);
@@ -987,6 +987,8 @@ float MainWindow::test()
     qDebug() << "Start test";
     ui->label_mainResult->setText("Result pending");
 
+    qDebug() << mainNetwork.getNInputNode();
+
     std::deque<std::vector<float>> input, output;
 
     std::vector<float> test;
@@ -1075,12 +1077,12 @@ void MainWindow::loadData(std::deque<std::vector<float>>& input, std::deque<std:
         {
             QImage image(fileinfo.absoluteFilePath());
 
-#ifndef GREY
-            itInput->resize(380*380*3+1);
-#else
-            itInput->resize(380*380+1);
-#endif
-
+            if(grey == false)
+            {
+                itInput->resize(380*380*3+1);
+            }else{
+                itInput->resize(380*380+1);
+            }
 
             for(int x = 0; x < 308; x++)
             {
@@ -1088,22 +1090,23 @@ void MainWindow::loadData(std::deque<std::vector<float>>& input, std::deque<std:
                 {
                     QColor color = image.pixelColor(x, y);
 
-        #ifndef GREY
-                    (*itInput)[x * 380 * 3 + y * 3] = color.redF();
-                    (*itInput)[x * 380 * 3 + y * 3] = color.greenF();
-                    (*itInput)[x * 380 * 3 + y * 3] = color.blueF();
-        #else
-                    (*itInput)[x * 380 + y] = color.blackF();
-        #endif
+                    if(grey == false)
+                    {
+                        (*itInput)[x * 380 * 3 + y * 3] = color.redF();
+                        (*itInput)[x * 380 * 3 + y * 3] = color.greenF();
+                        (*itInput)[x * 380 * 3 + y * 3] = color.blueF();
+                    }else{
+                        (*itInput)[x * 380 + y] = color.blackF();
+                    }
                 }
             }
 
-#ifndef GREY
-            (*itInput)[380*380*3] = 0.5f;//Bias
-#else
-            (*itInput)[380*380] = 0.5f;//Bias
-#endif
-
+            if(grey == false)
+            {
+                (*itInput)[380*380*3] = 0.5f;//Bias
+            }else{
+                (*itInput)[380*380] = 0.5f;//Bias
+            }
 
             itOutput->resize(3);
 
@@ -1133,10 +1136,7 @@ void MainWindow::on_pushButton_pick_clicked()
             return;
         }
 
-        std::vector<Activation*> arrActiv;
-        arrActiv.push_back(lin);
-
-        mainGen.loadGenome(fileName.toStdString());
+        mainGen = Genome::loadGenome(fileName.toStdString());
 
         Neat::genomeToNetwork(mainGen, mainNetwork);
 
@@ -1282,7 +1282,7 @@ void MainWindow::on_pushButton_unitTest_clicked()
     {
         QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
                                                         "",
-                                                        tr("Images (*.png *.xpm *.jpg)"));
+                                                        tr("Images (*.png *.jpg)"));
 
         if(!fileName.isEmpty())
         {
@@ -1298,12 +1298,12 @@ void MainWindow::on_pushButton_unitTest_clicked()
                 return;
             }
 
-#ifndef GREY
-            input.resize(380*380*3+1);
-#else
-            input.resize(380*380+1);
-
-#endif
+            if(grey == false)
+            {
+                input.resize(380*380*3+1);
+            }else{
+                input.resize(380*380+1);
+            }
 
             for(int x = 0; x < 308; x++)
             {
@@ -1311,22 +1311,23 @@ void MainWindow::on_pushButton_unitTest_clicked()
                 {
                     QColor color = image.pixelColor(x, y);
 
-#ifndef GREY
-                    input[x * 380 * 3 + y * 3] = color.redF();
-                    input[x * 380 * 3 + y * 3] = color.greenF();
-                    input[x * 380 * 3 + y * 3] = color.blueF();
-#else
-                    input[x * 380 + y] = color.blackF();
-#endif
-
+                    if(grey == false)
+                    {
+                        input[x * 380 * 3 + y * 3] = color.redF();
+                        input[x * 380 * 3 + y * 3] = color.greenF();
+                        input[x * 380 * 3 + y * 3] = color.blueF();
+                    }else{
+                        input[x * 380 + y] = color.blackF();
+                    }
                 }
             }
 
-#ifndef GREY
-                    input[380*380*3] = 0.5f;//Bias
-#else
-           input[380*380] = 0.5f;//Bias
-#endif
+            if(grey == false)
+            {
+                input[380*380*3] = 0.5f;//Bias
+            }else{
+                input[380*380] = 0.5f;//Bias
+            }
 
             mainNetwork.compute(input, output);
 
@@ -1582,6 +1583,34 @@ void MainWindow::on_pushButton_pickEsHyperneat_clicked()
 
 void MainWindow::on_pushButton_hybridId_clicked()
 {
-    useHyper = false;
+    if(lockMainTest.try_lock() == true)
+    {
+        useHyper = false;
+        lockMainTest.unlock();
+    }
+}
+
+void MainWindow::on_pushButton_color_clicked()
+{
+    if(lockMainTest.try_lock() == true)
+    {
+        std::vector<Activation*> arrActiv;
+        arrActiv.push_back(tanh);
+
+        if(grey == true)
+        {
+            grey = false;
+            mainGen = Genome(380*380*3+1, 3, arrActiv);
+
+            ui->label_color->setText("Color");
+        }else{
+            grey = true;
+            mainGen = Genome(380*380+1, 3, arrActiv);
+
+            ui->label_color->setText("Grey");
+        }
+
+        lockMainTest.unlock();
+    }
 }
 

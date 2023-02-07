@@ -78,6 +78,8 @@ private slots:
 
     void on_pushButton_hybridId_clicked();
 
+    void on_pushButton_color_clicked();
+
 private:
     Ui::MainWindow *ui;
 
@@ -99,6 +101,8 @@ private:
     Activation* sin = new SinActivation();
     Activation* threshold = new ThresholdActivation();
     Activation* abs = new AbsActivation();
+
+    bool grey = true;
 
     Hyperneat* hyper = nullptr;
     bool useHyper = false;
