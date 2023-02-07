@@ -82,7 +82,7 @@ private:
     QString model = "linear";//for basic test only
     long long seed;
 
-    NewNetwork newNetType = NewNetwork::LINEAR;//For main subject
+    //For main subject
     QString dataFolder = "";
     NeuralNetwork mainNetwork;
     Genome mainGen;

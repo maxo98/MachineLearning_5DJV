@@ -993,8 +993,6 @@ float MainWindow::test()
 
     loadData(input, output, dataFolder, false);
 
-    qDebug() << "a";
-
     float score = 0;
 
     for(int i = 0; i < input.size(); i++)
@@ -1026,8 +1024,6 @@ float MainWindow::test()
             }
         }
     }
-
-    qDebug() << "b";
 
     score = score / output.size() * 100;
 
@@ -1157,7 +1153,6 @@ void MainWindow::on_pushButton_newLinear_clicked()
 {
     if(lockMainTest.try_lock() == true)
     {
-        newNetType = NewNetwork::LINEAR;
         ui->label_netPath->setText("New linear");
 
         std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> allConn;
@@ -1176,7 +1171,6 @@ void MainWindow::on_pushButton_newPmc_clicked()
 {
     if(lockMainTest.try_lock() == true)
     {
-        newNetType = NewNetwork::PMC;
         ui->label_netPath->setText("New PMC");
 
         std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> allConn;
@@ -1212,7 +1206,6 @@ void MainWindow::on_pushButton_newRbf_clicked()
 {
     if(lockMainTest.try_lock() == true)
     {
-        newNetType = NewNetwork::RBF;
         ui->label_netPath->setText("New RBF");
 
         std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> allConn;
@@ -1428,15 +1421,15 @@ void MainWindow::createHyperNeatClass(bool hyperneat)
 
     HyperneatParameters hyperneatParam;
 
-    hyperneatParam.activationFunction = new LinearActivation();
+    hyperneatParam.activationFunction = tanh;
 
     hyperneatParam.cppnOutput = 2;
     hyperneatParam.nDimensions = 2;
     hyperneatParam.thresholdFunction = leoThreshold;
     hyperneatParam.weightModifierFunction = noChangeWeight;
 
-    hyperneatParam.cppnInput = 4;
-    hyperneatParam.cppnInputFunction = basicCppnInput;
+    hyperneatParam.cppnInput = 5;
+    hyperneatParam.cppnInputFunction = biasCppnInput;
 
     float threshold = 0.5;
 
@@ -1590,5 +1583,11 @@ void MainWindow::on_pushButton_pickEsHyperneat_clicked()
 
         lockMainTest.unlock();
     }
+}
+
+
+void MainWindow::on_pushButton_hybridId_clicked()
+{
+    useHyper = false;
 }
 
