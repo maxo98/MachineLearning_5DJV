@@ -8,7 +8,7 @@
 #include <QFileDialog>
 #include "ThreadPool.h"
 
-#define GREY
+#define IMG_SIZE 95
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -25,11 +25,7 @@ MainWindow::MainWindow(QWidget *parent)
     std::vector<Activation*> arrActiv;
     arrActiv.push_back(tanh);
 
-#ifndef GREY
-    mainGen = Genome(380*380*3+1, 3, arrActiv);
-#else
-    mainGen = Genome(380*380+1, 3, arrActiv);
-#endif
+    mainGen = Genome(IMG_SIZE*IMG_SIZE+1, 3, arrActiv);
 
     ThreadPool* pool = ThreadPool::getInstance();
     pool->start();
@@ -1082,33 +1078,33 @@ void MainWindow::loadData(std::deque<std::vector<float>>& input, std::deque<std:
 
             if(grey == false)
             {
-                itInput->resize(380*380*3+1);
+                itInput->resize(IMG_SIZE*IMG_SIZE*3+1);
             }else{
-                itInput->resize(380*380+1);
+                itInput->resize(IMG_SIZE*IMG_SIZE+1);
             }
 
-            for(int x = 0; x < 308; x++)
+            for(int x = 0; x < IMG_SIZE; x++)
             {
-                for(int y = 0; y < 380; y++)
+                for(int y = 0; y < IMG_SIZE; y++)
                 {
                     QColor color = image.pixelColor(x, y);
 
                     if(grey == false)
                     {
-                        (*itInput)[x * 380 * 3 + y * 3] = color.redF();
-                        (*itInput)[x * 380 * 3 + y * 3] = color.greenF();
-                        (*itInput)[x * 380 * 3 + y * 3] = color.blueF();
+                        (*itInput)[x * IMG_SIZE * 3 + y * 3] = color.redF();
+                        (*itInput)[x * IMG_SIZE * 3 + y * 3] = color.greenF();
+                        (*itInput)[x * IMG_SIZE * 3 + y * 3] = color.blueF();
                     }else{
-                        (*itInput)[x * 380 + y] = color.blackF();
+                        (*itInput)[x * IMG_SIZE + y] = color.blackF();
                     }
                 }
             }
 
             if(grey == false)
             {
-                (*itInput)[380*380*3] = 0.5f;//Bias
+                (*itInput)[IMG_SIZE*IMG_SIZE*3] = 0.5f;//Bias
             }else{
-                (*itInput)[380*380] = 0.5f;//Bias
+                (*itInput)[IMG_SIZE*IMG_SIZE] = 0.5f;//Bias
             }
 
             itOutput->resize(3);
@@ -1294,7 +1290,7 @@ void MainWindow::on_pushButton_unitTest_clicked()
 
             QImage image(fileName);
 
-            if(image.width() != 380 && image.height() != 380)
+            if(image.width() != IMG_SIZE && image.height() != IMG_SIZE)
             {
                 ui->label_mainResult->setText("Image is of the wrong size");
                 lockMainTest.unlock();
@@ -1303,33 +1299,33 @@ void MainWindow::on_pushButton_unitTest_clicked()
 
             if(grey == false)
             {
-                input.resize(380*380*3+1);
+                input.resize(IMG_SIZE*IMG_SIZE*3+1);
             }else{
-                input.resize(380*380+1);
+                input.resize(IMG_SIZE*IMG_SIZE+1);
             }
 
             for(int x = 0; x < 308; x++)
             {
-                for(int y = 0; y < 380; y++)
+                for(int y = 0; y < IMG_SIZE; y++)
                 {
                     QColor color = image.pixelColor(x, y);
 
                     if(grey == false)
                     {
-                        input[x * 380 * 3 + y * 3] = color.redF();
-                        input[x * 380 * 3 + y * 3] = color.greenF();
-                        input[x * 380 * 3 + y * 3] = color.blueF();
+                        input[x * IMG_SIZE * 3 + y * 3] = color.redF();
+                        input[x * IMG_SIZE * 3 + y * 3] = color.greenF();
+                        input[x * IMG_SIZE * 3 + y * 3] = color.blueF();
                     }else{
-                        input[x * 380 + y] = color.blackF();
+                        input[x * IMG_SIZE + y] = color.blackF();
                     }
                 }
             }
 
             if(grey == false)
             {
-                input[380*380*3] = 0.5f;//Bias
+                input[IMG_SIZE*IMG_SIZE*3] = 0.5f;//Bias
             }else{
-                input[380*380] = 0.5f;//Bias
+                input[IMG_SIZE*IMG_SIZE] = 0.5f;//Bias
             }
 
             mainNetwork.compute(input, output);
@@ -1429,7 +1425,7 @@ void MainWindow::createHyperNeatStructure(bool hyperneat)
 
     hyperneatParam.cppnOutput = 2;
     hyperneatParam.nDimensions = 2;
-    hyperneatParam.thresholdFunction = leoThreshold;
+    hyperneatParam.thresholdFunction = noThreshold;
     hyperneatParam.weightModifierFunction = noChangeWeight;
 
     hyperneatParam.cppnInput = 5;
@@ -1474,12 +1470,14 @@ void MainWindow::createHyperNeatStructure(bool hyperneat)
     std::vector<float> pos;
     pos.resize(2);
 
-    for(int x = -190; x < 190; x++)
+    int count = 0;
+
+    for(int x = -IMG_SIZE/2; x < IMG_SIZE/2; x++)
     {
-        for(int y = -190; y < 190; y++)
+        for(int y = -IMG_SIZE/2; y < IMG_SIZE/2; y++)
         {
-            pos[0] = x/190.f;
-            pos[1] = y/190.f;
+            pos[0] = x/IMG_SIZE/2.f;
+            pos[1] = y/IMG_SIZE/2.f;
             hyper->addInput(pos);
         }
     }
@@ -1603,12 +1601,12 @@ void MainWindow::on_pushButton_color_clicked()
         if(grey == true)
         {
             grey = false;
-            mainGen = Genome(380*380*3+1, 3, arrActiv);
+            mainGen = Genome(IMG_SIZE*IMG_SIZE*3+1, 3, arrActiv);
 
             ui->label_color->setText("Color");
         }else{
             grey = true;
-            mainGen = Genome(380*380+1, 3, arrActiv);
+            mainGen = Genome(IMG_SIZE*IMG_SIZE+1, 3, arrActiv);
 
             ui->label_color->setText("Grey");
         }
