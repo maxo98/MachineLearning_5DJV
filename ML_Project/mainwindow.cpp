@@ -961,13 +961,16 @@ float MainWindow::testHyper(NeuralNetwork* network, const std::deque<std::vector
             }
         }
 
-        for(int cpt = 0; cpt < 3; cpt++)
+        if((test[0] == test[1] && test[2] != test[0]) == false)
         {
-            if(output[index][cpt] == 1)
+            for(int cpt = 0; cpt < 3; cpt++)
             {
-                if(maxIndex == cpt)
+                if(output[index][cpt] == 1)
                 {
-                    score++;
+                    if(maxIndex == cpt)
+                    {
+                        score++;
+                    }
                 }
             }
         }
@@ -1422,7 +1425,7 @@ void MainWindow::createHyperNeatStructure(bool hyperneat)
 
     HyperneatParameters hyperneatParam;
 
-    hyperneatParam.activationFunction = tanh;
+    hyperneatParam.activationFunction = lin;
 
     hyperneatParam.cppnOutput = 2;
     hyperneatParam.nDimensions = 2;
