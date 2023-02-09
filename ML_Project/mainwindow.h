@@ -101,6 +101,7 @@ private:
     Activation* sin = new SinActivation();
     Activation* threshold = new ThresholdActivation();
     Activation* abs = new AbsActivation();
+    Activation* relu = new ReluActivation();
 
     bool grey = true;
 

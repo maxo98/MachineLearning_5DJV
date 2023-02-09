@@ -647,7 +647,7 @@ void Genome::fullyConnect(int nLayer, int nNode, Activation* hiddenActivation, A
                 {
                     for (unsigned int i2 = 0; i2 < input - 1; i2++)
                     {
-                        addConnection(i2, cpt + i * nNode + input, allConnections, weightInit(in, out, seed));
+                        addConnection(i2, cpt + i * nNode + input, allConnections, weightInit(in-1, out, seed));//less 1 for bias node
                     }
                 }
                 else {

@@ -96,27 +96,27 @@ void MainWindow::on_pushButton_test1_clicked()
         arrActiv.push_back(tanh);
         Genome gen(3, 1, arrActiv);
 
-        float normalizedXavier = 1/sqrt(3.f);
+        float uniformXavier = 1/sqrt(2.f);
 
         if(model == "linear")
         {
-            gen.addConnection(0, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-            gen.addConnection(1, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-            gen.addConnection(2, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
+            gen.addConnection(0, 3, allConn, randPosNeg() * randFloat() * uniformXavier);
+            gen.addConnection(1, 3, allConn, randPosNeg() * randFloat() * uniformXavier);
+            gen.addConnection(2, 3, allConn, randPosNeg() * randFloat() * uniformXavier);
 
             Neat::genomeToNetwork(gen, network);
         }else if(model == "PMC")
         {
-            gen.addConnection(0, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-            gen.addConnection(1, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-            gen.addConnection(2, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
+            gen.addConnection(0, 3, allConn, randPosNeg() * randFloat() * uniformXavier);
+            gen.addConnection(1, 3, allConn, randPosNeg() * randFloat() * uniformXavier);
+            gen.addConnection(2, 3, allConn, randPosNeg() * randFloat() * uniformXavier);
 
             Neat::genomeToNetwork(gen, network);
         }else if(model == "RBF")
         {
-            gen.addConnection(0, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-            gen.addConnection(1, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-            gen.addConnection(2, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
+            gen.addConnection(0, 3, allConn, randPosNeg() * randFloat() * uniformXavier);
+            gen.addConnection(1, 3, allConn, randPosNeg() * randFloat() * uniformXavier);
+            gen.addConnection(2, 3, allConn, randPosNeg() * randFloat() * uniformXavier);
 
             Neat::genomeToNetwork(gen, network);
         }
@@ -265,27 +265,27 @@ void MainWindow::on_pushButton_test2_clicked()
 
         Genome gen(3, 1, arrActiv);
 
-        float normalizedXavier = 1/sqrt(3.f);
+        float uniformXavier = 1/sqrt(2.f);
 
         if(model == "linear")
         {
-            gen.addConnection(0, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-            gen.addConnection(1, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-            gen.addConnection(2, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
+            gen.addConnection(0, 3, allConn, randPosNeg() * randFloat() * uniformXavier);
+            gen.addConnection(1, 3, allConn, randPosNeg() * randFloat() * uniformXavier);
+            gen.addConnection(2, 3, allConn, randPosNeg() * randFloat() * uniformXavier);
 
             Neat::genomeToNetwork(gen, network);
         }else if(model == "PMC")
         {
-            gen.addConnection(0, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-            gen.addConnection(1, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-            gen.addConnection(2, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
+            gen.addConnection(0, 3, allConn, randPosNeg() * randFloat() * uniformXavier);
+            gen.addConnection(1, 3, allConn, randPosNeg() * randFloat() * uniformXavier);
+            gen.addConnection(2, 3, allConn, randPosNeg() * randFloat() * uniformXavier);
 
             Neat::genomeToNetwork(gen, network);
         }else if(model == "RBF")
         {
-            gen.addConnection(0, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-            gen.addConnection(1, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-            gen.addConnection(2, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
+            gen.addConnection(0, 3, allConn, randPosNeg() * randFloat() * uniformXavier);
+            gen.addConnection(1, 3, allConn, randPosNeg() * randFloat() * uniformXavier);
+            gen.addConnection(2, 3, allConn, randPosNeg() * randFloat() * uniformXavier);
 
             Neat::genomeToNetwork(gen, network);
         }
@@ -425,12 +425,12 @@ void MainWindow::on_pushButton_test3_clicked()
         std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> allConn;
 
         Genome gen(3, 1, arrActiv);
-        float normalizedXavier = 1/sqrt(3.f);
+        float uniformXavier = 1/sqrt(2.f);
 
         if(model == "linear")
         {
-            gen.addConnection(0, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
-            gen.addConnection(1, 3, allConn, randPosNeg() * randFloat() * normalizedXavier);
+            gen.addConnection(0, 3, allConn, randPosNeg() * randFloat() * uniformXavier);
+            gen.addConnection(1, 3, allConn, randPosNeg() * randFloat() * uniformXavier);
             gen.addConnection(2, 3, allConn, 0);
 
             Neat::genomeToNetwork(gen, network);
@@ -937,11 +937,9 @@ float MainWindow::testHyper(NeuralNetwork* network, const std::deque<std::vector
 
     //hyper->genomeToNetwork(*hyper->getGoat(), net);
 
-    for(int i = 0; i < 25; i++)
+    for(int i = 0; i < input.size(); i++)
     {
-        int index = randInt(0, input.size()-1);
-
-        network->compute(input[index], test);
+        network->compute(input[i], test);
 
         int maxIndex = 0;
 
@@ -961,7 +959,7 @@ float MainWindow::testHyper(NeuralNetwork* network, const std::deque<std::vector
         {
             for(int cpt = 0; cpt < 3; cpt++)
             {
-                if(output[index][cpt] == 1)
+                if(output[i][cpt] == 1)
                 {
                     if(maxIndex == cpt)
                     {
@@ -972,7 +970,7 @@ float MainWindow::testHyper(NeuralNetwork* network, const std::deque<std::vector
         }
     }
 
-    return score/2;
+    return score;
 }
 
 float MainWindow::test()
@@ -1190,7 +1188,7 @@ void MainWindow::on_pushButton_newPmc_clicked()
             ui->label_mainResult->setText("Error nodes is not a number");
         }
 
-        mainGen.fullyConnect(layer, nodes, tanh, tanh, allConn, heUniformInit, seed);
+        mainGen.fullyConnect(layer, nodes, tanh, tanh, allConn, xavierUniformInit, seed);
 
         Neat::genomeToNetwork(mainGen, mainNetwork);
 
@@ -1411,9 +1409,9 @@ void MainWindow::createHyperNeatStructure(bool hyperneat)
 
 
     neatparam.speciationDistanceMod = 0.5;
-    neatparam.minExpectedSpecies = 15;
-    neatparam.maxExpectedSpecies = 40;
-    neatparam.adaptSpeciation = false;
+    neatparam.minExpectedSpecies = 8;
+    neatparam.maxExpectedSpecies = 25;
+    neatparam.adaptSpeciation = true;
 
     neatparam.keepChamp = true;
     neatparam.elistism = true;
@@ -1518,6 +1516,7 @@ void MainWindow::on_pushButton_esHyperneat_clicked()
     if(lockMainTest.try_lock() == true)
     {
         createHyperNeat(false);
+        ui->label_netPath->setText("New ES-HyperNEAT");
 
         lockMainTest.unlock();
     }
