@@ -8,7 +8,7 @@
 #include <QFileDialog>
 #include "ThreadPool.h"
 
-#define IMG_SIZE 95
+#define IMG_SIZE 380
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
