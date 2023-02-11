@@ -566,19 +566,6 @@
        <string>Load ES-HyperNEAT</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_hybridId">
-      <property name="geometry">
-       <rect>
-        <x>880</x>
-        <y>140</y>
-        <width>141</width>
-        <height>51</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>HybridID</string>
-      </property>
-     </widget>
      <widget class="QPushButton" name="pushButton_color">
       <property name="geometry">
        <rect>

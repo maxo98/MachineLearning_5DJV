@@ -66,6 +66,8 @@ public:
     QPushButton *pushButton_esHyperneat;
     QPushButton *pushButton_pickHyperneat;
     QPushButton *pushButton_pickEsHyperneat;
+    QPushButton *pushButton_color;
+    QLabel *label_color;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -73,12 +75,12 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName("MainWindow");
-        MainWindow->resize(936, 922);
+        MainWindow->resize(1086, 922);
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName("centralwidget");
         tabWidget = new QTabWidget(centralwidget);
         tabWidget->setObjectName("tabWidget");
-        tabWidget->setGeometry(QRect(20, 0, 901, 871));
+        tabWidget->setGeometry(QRect(20, 0, 1041, 871));
         tab = new QWidget();
         tab->setObjectName("tab");
         pushButton_test4 = new QPushButton(tab);
@@ -123,7 +125,7 @@ public:
         pushButton_train->setGeometry(QRect(130, 80, 141, 51));
         label_netPath = new QLabel(tab_2);
         label_netPath->setObjectName("label_netPath");
-        label_netPath->setGeometry(QRect(130, 40, 551, 31));
+        label_netPath->setGeometry(QRect(130, 40, 881, 31));
         QFont font1;
         font1.setPointSize(12);
         label_netPath->setFont(font1);
@@ -205,15 +207,22 @@ public:
         pushButton_esHyperneat->setGeometry(QRect(730, 140, 141, 51));
         pushButton_pickHyperneat = new QPushButton(tab_2);
         pushButton_pickHyperneat->setObjectName("pushButton_pickHyperneat");
-        pushButton_pickHyperneat->setGeometry(QRect(730, 80, 141, 21));
+        pushButton_pickHyperneat->setGeometry(QRect(730, 80, 141, 51));
         pushButton_pickEsHyperneat = new QPushButton(tab_2);
         pushButton_pickEsHyperneat->setObjectName("pushButton_pickEsHyperneat");
-        pushButton_pickEsHyperneat->setGeometry(QRect(730, 110, 141, 21));
+        pushButton_pickEsHyperneat->setGeometry(QRect(880, 80, 141, 51));
+        pushButton_color = new QPushButton(tab_2);
+        pushButton_color->setObjectName("pushButton_color");
+        pushButton_color->setGeometry(QRect(10, 440, 101, 51));
+        label_color = new QLabel(tab_2);
+        label_color->setObjectName("label_color");
+        label_color->setGeometry(QRect(20, 510, 81, 21));
+        label_color->setFont(font1);
         tabWidget->addTab(tab_2, QString());
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName("menubar");
-        menubar->setGeometry(QRect(0, 0, 936, 20));
+        menubar->setGeometry(QRect(0, 0, 1086, 20));
         MainWindow->setMenuBar(menubar);
         statusbar = new QStatusBar(MainWindow);
         statusbar->setObjectName("statusbar");
@@ -267,7 +276,9 @@ public:
         pushButton_hyperneat->setText(QCoreApplication::translate("MainWindow", "HyperNEAT", nullptr));
         pushButton_esHyperneat->setText(QCoreApplication::translate("MainWindow", "ES-HyperNEAT", nullptr));
         pushButton_pickHyperneat->setText(QCoreApplication::translate("MainWindow", "Load HyperNEAT", nullptr));
-        pushButton_pickEsHyperneat->setText(QCoreApplication::translate("MainWindow", "Load HyperNEAT", nullptr));
+        pushButton_pickEsHyperneat->setText(QCoreApplication::translate("MainWindow", "Load ES-HyperNEAT", nullptr));
+        pushButton_color->setText(QCoreApplication::translate("MainWindow", "Switch color", nullptr));
+        label_color->setText(QCoreApplication::translate("MainWindow", "Grey", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_2), QCoreApplication::translate("MainWindow", "Main subject", nullptr));
     } // retranslateUi
 
