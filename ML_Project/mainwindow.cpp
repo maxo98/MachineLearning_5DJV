@@ -37,6 +37,10 @@ MainWindow::~MainWindow()
     delete sig;
     delete gauss;
     delete lin;
+    delete sin;
+    delete threshold;
+    delete abs;
+    delete relu;
 
     delete ui;
 }
